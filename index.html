@@ -3139,6 +3139,21 @@
     // Default room render on load, but wait for cinematic overlay start to trigger active timer.
     render();
     updateAudioButton(false);
+ function goToGuestList() {
+  const titleSlide = document.getElementById("opSlideTitle");
+  const guestListSlide = document.getElementById("opSlideGuestList");
+
+  if (titleSlide) {
+    titleSlide.classList.remove("active");
+    titleSlide.style.display = "none";
+  }
+
+  if (guestListSlide) {
+    guestListSlide.style.display = "flex";
+    guestListSlide.classList.add("active");
+    guestListSlide.scrollTop = 0;
+  }
+}
   </script>
 </body>
 </html>
