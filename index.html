@@ -1109,7 +1109,12 @@
       }
       .flash-active {
         animation: lightning-flash 0.7s ease-out;
-      }
+      } .story-intro-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
+}
     </style>
   </head>
   <body>
@@ -1138,34 +1143,12 @@
             </button>
           </div>
 
-          <!-- Phase 2 Slide: 5 seconds trip representation -->
-          <div id="opSlideTrip" class="op-slide" style="background: #010204;">
-            <div class="pension-trip-visual">
-              <div class="silhouette-group">
-                <div style="position: absolute; inset: 0; background: rgba(255, 94, 94, 0.08); border-radius: 8px; z-index: 2; pointer-events: none;"></div>
-                <div style="position: absolute; top: 12px; left: 16px; font-family: monospace; font-size: 9px; color: rgba(255,255,255,0.3); z-index: 3;">Polaroid Cam® / 2026. 05. 24</div>
-                <div class="peer-silhouette" style="height: 125px;">
-                  <div class="peer-head"></div>
-                  <span style="position: absolute; bottom: -20px; left:0; width:100%; text-align:center; font-size:9px; color:rgba(255,255,255,0.4);">서희</span>
-                </div>
-                <div class="peer-silhouette" style="height: 145px; background: rgba(255,255,255,0.08);">
-                  <div class="peer-head"></div>
-                  <span style="position: absolute; bottom: -20px; left:0; width:100%; text-align:center; font-size:9px; color:rgba(255,255,255,0.4);">은서</span>
-                </div>
-                <div class="peer-silhouette" style="height: 130px;">
-                  <div class="peer-head"></div>
-                  <span style="position: absolute; bottom: -20px; left:0; width:100%; text-align:center; font-size:9px; color:rgba(255,255,255,0.4);">가현</span>
-                </div>
-                <div class="peer-silhouette" style="height: 140px; background: rgba(255,255,255,0.07);">
-                  <div class="peer-head"></div>
-                  <span style="position: absolute; bottom: -20px; left:0; width:100%; text-align:center; font-size:9px; color:rgba(255,255,255,0.4);">하경</span>
-                </div>
-              </div>
-            </div>
-            <div class="subtitle-overlay" id="tripSubtitle">
-              2026년 5월... 우리는 오랜만에 다 함께 모여 흔들다리 펜션으로 여행을 떠났다.
-            </div>
-          </div>
+        <!-- Phase 2 Slide: Real opening video -->
+<div id="opSlideTrip" class="op-slide" style="background: #000;">
+  <video id="storyIntroVideo" class="story-intro-video" playsinline>
+    <source src="/bridge-pension-game/bridge_intro.mp4" type="video/mp4">
+  </video>
+</div>
 
           <!-- Phase 3 Slide: 2 seconds scream representation -->
           <div id="opSlideScream" class="op-slide" style="background: #000; justify-content: center;">
@@ -3047,137 +3030,33 @@
     }
 
     function startCinematic() {
-      initSpookyAudio();
-      
-      document.getElementById("opSlideStart").classList.remove("active");
-      document.getElementById("opSlideTrip").classList.add("active");
-      
-      playCinematicSlowTension();
-      
-      // Update trip subtitle at 2.5 seconds
-      setTimeout(() => {
-        const tripSub = document.getElementById("tripSubtitle");
-        if (tripSub) {
-          tripSub.textContent = "그때까지만 해도, 우리 사이에 어떤 끔찍한 비밀이 숨겨져 있는지 아무도 눈치채지 못했다.";
-        }
-      }, 2500);
+  initSpookyAudio();
 
-      // Slide 3: Scream at 5 seconds
-      setTimeout(() => {
-        document.getElementById("opSlideTrip").classList.remove("active");
-        document.getElementById("opSlideScream").classList.add("active");
-        triggerLightningFlash();
-        playCinematicScream();
-      }, 5000);
+  document.getElementById("opSlideStart").classList.remove("active");
+  document.getElementById("opSlideTrip").classList.add("active");
 
-      // Slide 4: Whisper at 7 seconds
-      setTimeout(() => {
-        document.getElementById("opSlideScream").classList.remove("active");
-        document.getElementById("opSlideWhisper").classList.add("active");
-      }, 7000);
+  const video = document.getElementById("storyIntroVideo");
 
-      // Slide 5: Title Reveal at 9 seconds
-      setTimeout(() => {
-        document.getElementById("opSlideWhisper").classList.remove("active");
-        document.getElementById("opSlideTitle").classList.add("active");
-        triggerLightningFlash();
-      }, 9000);
+  if (video) {
+    video.currentTime = 0;
+    video.muted = false;
+
+    const playPromise = video.play();
+
+    if (playPromise !== undefined) {
+      playPromise.catch(() => {
+        video.muted = true;
+        video.play();
+      });
     }
 
-    function goToGuestList() {
-      document.getElementById("opSlideTitle").classList.remove("active");
-      setTimeout(() => {
-        document.getElementById("opSlideTitle").style.display = "none";
-        const listSlide = document.getElementById("opSlideGuestList");
-        listSlide.style.display = "flex";
-        setTimeout(() => {
-          listSlide.classList.add("active");
-        }, 50);
-      }, 800);
+    video.onended = () => {
+      document.getElementById("opSlideTrip").classList.remove("active");
+      document.getElementById("opSlideTitle").classList.add("active");
       triggerLightningFlash();
-    }
-
-    function goToGuestTalks() {
-      document.getElementById("opSlideGuestList").classList.remove("active");
-      setTimeout(() => {
-        document.getElementById("opSlideGuestList").style.display = "none";
-        const talksSlide = document.getElementById("opSlideGuestTalks");
-        talksSlide.style.display = "flex";
-        setTimeout(() => {
-          talksSlide.classList.add("active");
-        }, 50);
-      }, 800);
-      triggerLightningFlash();
-    }
-
-    function selectCinTalk(suspectId) {
-      if (!state.cinDialogueRead) {
-        state.cinDialogueRead = { seohee: false, gahyun: false, hakyeong: false };
-      }
-      state.cinDialogueRead[suspectId] = true;
-      
-      const speakerEl = document.getElementById("cinDialogueSpeaker");
-      const textEl = document.getElementById("cinDialogueText");
-      
-      // Reset borders of all option buttons
-      document.getElementById("cinTalkTab_seohee").style.borderColor = "rgba(255,255,255,0.1)";
-      document.getElementById("cinTalkTab_seohee").style.background = "rgba(255,255,255,0.03)";
-      document.getElementById("cinTalkTab_gahyun").style.borderColor = "rgba(255,255,255,0.1)";
-      document.getElementById("cinTalkTab_gahyun").style.background = "rgba(255,255,255,0.03)";
-      document.getElementById("cinTalkTab_hakyeong").style.borderColor = "rgba(255,255,255,0.1)";
-      document.getElementById("cinTalkTab_hakyeong").style.background = "rgba(255,255,255,0.03)";
-      
-      // Highlight selected Button
-      const selectedBtn = document.getElementById("cinTalkTab_" + suspectId);
-      if (selectedBtn) {
-        selectedBtn.style.borderColor = "#ff3c3c";
-        selectedBtn.style.background = "rgba(255, 60, 60, 0.12)";
-      }
-      
-      const statements = {
-        seohee: {
-          name: "👩‍💼 이서희 (용의자 1)",
-          text: "“내가 왜 펜션 CCTV 위치를 검색해 봤냐고요? 하… 진짜 몰라서 물어요? 은서 그 기집애가 만든 1분 단위 시간표 좀 보세요. 화장실 가는 시간까지 감시당하는 기분이었다니까요? 사람 미치게 만드는 통제에서 딱 몇 분이라도 숨 좀 쉬고 싶어서 사각지대를 찾아본 것뿐이에요. 내가 은서를 죽였다는 증거라도 있어요?”"
-        },
-        gahyun: {
-          name: "👩‍🎨 전가현 (용의자 2)",
-          text: "“제 키링이 왜 흔들다리 난간에서 나와요? 전 거기 가기도 싫단 말이에요! 은서가 억지로 그 무서운 다리를 건너게 하려고 밀어붙였을 때, 정말 숨도 안 쉬어지고 심장이 터질 것 같았어요. 그래서 소리 지르고 화를 내긴 했지만… 그렇다고 제가 은서를 죽여요? 전 제 방에 계속 틀어박혀서 울고만 있었다고요, 제발 믿어주세요!”"
-        },
-        hakyeong: {
-          name: "👩‍🎤 최하경 (용의자 3)",
-          text: "“은서가 안타깝게 되었다는 소식은 들었어요. 하지만 전 정말 사건 당시엔 지하 노래방에 쭉 있었는걸요? 방음벽이 두꺼워서 밖에서 무슨 일이 일어났는지는 전혀 몰랐어요. 일정표에 얽매이지 않고 편하게 쉬려다 이런 일이 생겨서 참 유감스럽네요.”"
-        }
-      };
-      
-      if (statements[suspectId]) {
-        speakerEl.textContent = statements[suspectId].name;
-        textEl.textContent = statements[suspectId].text;
-      }
-      
-      // Check if all dialogues have been read
-      if (state.cinDialogueRead.seohee && state.cinDialogueRead.gahyun && state.cinDialogueRead.hakyeong) {
-        const nextBtn = document.getElementById("cinDialogueNextBtn");
-        nextBtn.style.opacity = "1";
-        nextBtn.style.pointerEvents = "auto";
-        nextBtn.removeAttribute("title");
-        nextBtn.style.background = "rgba(255, 60, 60, 0.45)";
-        nextBtn.style.borderColor = "#ff3c3c";
-        nextBtn.style.boxShadow = "0 0 15px rgba(255, 60, 60, 0.4)";
-      }
-    }
-
-    function goToGameStart() {
-      document.getElementById("opSlideGuestTalks").classList.remove("active");
-      setTimeout(() => {
-        document.getElementById("opSlideGuestTalks").style.display = "none";
-        const startSlide = document.getElementById("opSlideGameStart");
-        startSlide.style.display = "flex";
-        setTimeout(() => {
-          startSlide.classList.add("active");
-        }, 50);
-      }, 800);
-      triggerLightningFlash();
-    }
+    };
+  }
+}
 
     function dismissCinematic() {
       cinematicDismissed = true;
