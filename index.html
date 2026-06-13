@@ -1242,9 +1242,9 @@
               </div>
 
               <div style="text-align: center; margin-top: 10px;">
-                <button onclick="goToGuestTalks()" class="enter-btn" style="min-width: 240px; border-radius: 20px;">
-                  function goToSuspectDialogues() {   showOpeningSlide("opSlideSuspectDialogues"); } ➡️
-                </button>
+               <button onclick="goToGuestTalks()" class="enter-btn" style="min-width: 240px;">
+  다음: 투숙객 대화 확인하기 ➡️
+</button>
               </div>
             </div>
           </div>
@@ -1279,9 +1279,9 @@
               </div>
 
               <div style="text-align: center;">
-                <button id="cinDialogueNextBtn" onclick="goToGameStart()" class="enter-btn" style="min-width: 240px; border-radius: 20px; opacity: 0.4; pointer-events: none;" title="모든 용의자와의 진술을 먼저 확인해보세요.">
-                  다음 단계 ➡️
-                </button>
+               <button id="guestTalkNextBtn" onclick="goToInvestigationStart()" class="enter-btn" disabled>
+  다음 단계 ➡️
+</button> 
               </div>
             </div>
           </div>
@@ -3235,7 +3235,64 @@ function goToSuspectDialogues() {
 
 function goToInvestigationStart() {
   showOpeningSlide("opSlideInvestigationStart");
-} 
+} const cinTalkChecked = {
+  seohee: false,
+  gahyun: false,
+  hakyeong: false
+};
+
+function selectCinTalk(person) {
+  const resultBox =
+    document.getElementById("cinTalkContent") ||
+    document.getElementById("guestTalkContent") ||
+    document.querySelector("#opSlideGuestTalks .content-box") ||
+    document.querySelector("#opSlideGuestTalks .dialogue-box") ||
+    document.querySelector("#opSlideGuestTalks .talk-result");
+
+  const talks = {
+    seohee: {
+      title: "이서희의 진술",
+      text: "은서의 통제가 답답해서 CCTV 사각지대를 찾아본 것은 맞다. 하지만 사건 당시 은서를 해치려 한 것은 아니라고 주장한다."
+    },
+    gahyun: {
+      title: "전가현의 진술",
+      text: "흔들다리를 건너는 것을 극도로 두려워한다. 난간에서 발견된 키링은 누군가 일부러 가져다 둔 것이라고 말한다."
+    },
+    hakyeong: {
+      title: "최하경의 진술",
+      text: "사건 당시 노래방에 있었다고 주장한다. 향에 예민하다고 말하지만, 이후 단서들과 진술이 모순될 가능성이 있다."
+    }
+  };
+
+  const selected = talks[person];
+  if (!selected) return;
+
+  cinTalkChecked[person] = true;
+
+  if (resultBox) {
+    resultBox.innerHTML = `
+      <h3 style="color:#ff3c3c; margin-bottom: 16px;">${selected.title}</h3>
+      <p style="line-height:1.9; word-break: keep-all;">${selected.text}</p>
+    `;
+  }
+
+  const tab = document.getElementById(`cinTalkTab_${person}`);
+  if (tab) {
+    tab.style.borderColor = "rgba(255, 60, 60, 0.8)";
+    tab.style.color = "#ff5e5e";
+  }
+
+  const nextBtn =
+    document.getElementById("guestTalkNextBtn") ||
+    document.getElementById("cinTalkNextBtn") ||
+    document.querySelector("#opSlideGuestTalks button[onclick='goToInvestigationStart()']");
+
+  if (nextBtn && cinTalkChecked.seohee && cinTalkChecked.gahyun && cinTalkChecked.hakyeong) {
+    nextBtn.disabled = false;
+    nextBtn.style.opacity = "1";
+    nextBtn.style.pointerEvents = "auto";
+  }
+}
   </script>
 </body>
 </html>
