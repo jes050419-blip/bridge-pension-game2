@@ -1243,7 +1243,7 @@
 
               <div style="text-align: center; margin-top: 10px;">
                 <button onclick="goToGuestTalks()" class="enter-btn" style="min-width: 240px; border-radius: 20px;">
-                  다음: 투숙객 대화 확인하기 ➡️
+                  function goToSuspectDialogues() {   showOpeningSlide("opSlideSuspectDialogues"); } ➡️
                 </button>
               </div>
             </div>
@@ -3154,6 +3154,88 @@
     guestListSlide.scrollTop = 0;
   }
 }
+function showOpeningSlide(slideId) {
+  document.querySelectorAll("#openingSequence .op-slide").forEach((slide) => {
+    slide.classList.remove("active");
+    slide.style.display = "none";
+  });
+
+  const target = document.getElementById(slideId);
+
+  if (target) {
+    target.style.display = "flex";
+    target.classList.add("active");
+    target.scrollTop = 0;
+  } else {
+    console.error("Slide not found:", slideId);
+  }
+}
+
+function goToGuestList() {
+  showOpeningSlide("opSlideGuestList");
+}
+
+function goToGuestTalks() {
+  showOpeningSlide("opSlideGuestTalks");
+}
+
+function goToInvestigationStart() {
+  showOpeningSlide("opSlideInvestigationStart");
+}function showOpeningSlide(slideId) {
+  document.querySelectorAll("#openingSequence .op-slide").forEach((slide) => {
+    slide.classList.remove("active");
+    slide.style.display = "none";
+  });
+
+  const target = document.getElementById(slideId);
+
+  if (target) {
+    target.style.display = "flex";
+    target.classList.add("active");
+    target.scrollTop = 0;
+  } else {
+    console.error("Slide not found:", slideId);
+  }
+}
+
+function goToGuestList() {
+  showOpeningSlide("opSlideGuestList");
+}
+
+function goToSuspectDialogues() {
+  showOpeningSlide("opSlideSuspectDialogues");
+}
+
+function goToInvestigationStart() {
+  showOpeningSlide("opSlideInvestigationStart");
+}function showOpeningSlide(slideId) {
+  document.querySelectorAll("#openingSequence .op-slide").forEach((slide) => {
+    slide.classList.remove("active");
+    slide.style.display = "none";
+  });
+
+  const target = document.getElementById(slideId);
+
+  if (target) {
+    target.style.display = "flex";
+    target.classList.add("active");
+    target.scrollTop = 0;
+  } else {
+    console.error("Slide not found:", slideId);
+  }
+}
+
+function goToGuestList() {
+  showOpeningSlide("opSlideGuestList");
+}
+
+function goToSuspectDialogues() {
+  showOpeningSlide("opSlideSuspectDialogues");
+}
+
+function goToInvestigationStart() {
+  showOpeningSlide("opSlideInvestigationStart");
+} 
   </script>
 </body>
 </html>
