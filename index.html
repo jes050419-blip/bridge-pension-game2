@@ -1,0 +1,3265 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>흔들다리 펜션 | 방탈출 추리 게임</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=East+Sea+Dokdo&display=swap');
+
+    :root {
+      --bg: #000000;
+      --panel: rgba(12, 12, 12, 0.96);
+      --panel2: rgba(22, 16, 16, 0.96);
+      --line: rgba(226, 60, 60, 0.22);
+      --text: #fdfaf6;
+      --muted: #a19595;
+      --accent: #ff3c3c;
+      --danger: #ff3030;
+      --ok: #ff5454;
+      --locked: #332828;
+      --shadow: 0 20px 80px rgba(0, 0, 0, 0.95);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Nanum Myeongjo', -apple-system, BlinkMacSystemFont, serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 30% 0%, rgba(132, 20, 20, 0.22), transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(182, 30, 30, 0.16), transparent 45%),
+        #050505;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(110deg, transparent 0%, transparent 45%, rgba(255,255,255,0.06) 46%, transparent 47%, transparent 100%),
+        linear-gradient(100deg, transparent 0%, transparent 60%, rgba(255,255,255,0.035) 61%, transparent 62%, transparent 100%);
+      background-size: 180px 180px, 240px 240px;
+      animation: rain 0.8s linear infinite;
+      opacity: 0.55;
+      z-index: 0;
+    }
+
+    @keyframes rain {
+      from { background-position: 0 0, 0 0; }
+      to { background-position: -90px 180px, -120px 240px; }
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      width: min(1180px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: end;
+      margin-bottom: 18px;
+    }
+
+    .title-box {
+      padding: 20px 22px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: rgba(10, 10, 10, 0.8);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .eyebrow {
+      margin: 0 0 6px;
+      color: var(--accent);
+      letter-spacing: 0.12em;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 5vw, 54px);
+      line-height: 1;
+      letter-spacing: -0.05em;
+    }
+
+    .subtitle {
+      margin: 12px 0 0;
+      color: var(--muted);
+      line-height: 1.6;
+      word-break: keep-all;
+    }
+
+    .reset-btn {
+      align-self: stretch;
+      border: 1px solid rgba(226, 60, 60, 0.4);
+      background: rgba(226, 60, 60, 0.12);
+      color: var(--accent);
+      border-radius: 18px;
+      padding: 0 18px;
+      cursor: pointer;
+      font-weight: 800;
+      min-height: 54px;
+    }
+
+    .reset-btn:hover {
+      background: rgba(226, 60, 60, 0.22);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 330px;
+      gap: 18px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+    }
+
+    .main-panel {
+      min-height: 650px;
+    }
+
+    .panel-head {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+    }
+
+    .panel-head h2,
+    .side-section h3 {
+      margin: 0;
+    }
+
+    .room-desc {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.7;
+      word-break: keep-all;
+    }
+
+    .content {
+      padding: 20px;
+    }
+
+    .rooms {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 900px) {
+      .rooms {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .rooms {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    button {
+      font: inherit;
+    }
+
+    /* room-btn-card is our custom styled rectangular box */
+    .room-btn-card {
+      position: relative;
+      height: 100px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      background: #050505;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      text-align: left;
+      user-select: none;
+    }
+
+    .room-card-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.22) contrast(1.15) saturate(0.6) grayscale(0.25);
+      transition: all 0.3s ease;
+      pointer-events: none;
+    }
+
+    .room-btn-card:hover:not(.locked) .room-card-img {
+      filter: brightness(0.4) contrast(1.2) scale(1.05);
+      border-color: rgba(255, 60, 60, 0.45);
+    }
+
+    .room-btn-card:hover:not(.locked) {
+      transform: translateY(-2px);
+      border-color: rgba(255, 60, 60, 0.45);
+    }
+
+    .room-btn-card.active .room-card-img {
+      filter: brightness(0.5) contrast(1.25) saturate(0.8);
+    }
+
+    .room-btn-card.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 15px rgba(255, 60, 60, 0.25);
+    }
+
+    .room-card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 25%, rgba(0, 0, 0, 0.1) 100%);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .room-card-text {
+      position: relative;
+      z-index: 3;
+      padding: 10px;
+      width: 100%;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .room-card-title {
+      font-family: 'Nanum Myeongjo', serif;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #eaeaea;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.85);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .room-btn-card.active .room-card-title {
+      color: var(--accent);
+    }
+
+    .room-card-status {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 2px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.85);
+    }
+
+    .room-btn-card.locked {
+      cursor: not-allowed;
+      border-color: rgba(255, 255, 255, 0.02);
+    }
+
+    .room-btn-card.locked .room-card-img {
+      filter: brightness(0.1) grayscale(0.95);
+    }
+
+    .room-btn-card.locked .room-card-title {
+      color: var(--locked);
+    }
+
+    .object-btn,
+    .talk-btn,
+    .accuse-btn,
+    .primary-btn {
+      border: 1px solid var(--line);
+      color: var(--text);
+      background: rgba(255,255,255,0.055);
+      border-radius: 14px;
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: transform 0.12s ease, background 0.12s ease, border 0.12s ease;
+    }
+
+    .object-btn:hover,
+    .talk-btn:hover,
+    .accuse-btn:hover,
+    .primary-btn:hover {
+      transform: translateY(-1px);
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255, 60, 60, 0.45);
+    }
+
+    /* 펜션 투숙객 명단 전용 스타일 */
+    .guest-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .guest-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 10px;
+      padding: 10px 12px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .guest-card:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: var(--accent);
+    }
+
+    .guest-name {
+      font-weight: 700;
+      font-size: 13.5px;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      padding-bottom: 4px;
+    }
+
+    .guest-role {
+      font-size: 10.5px;
+      font-weight: bold;
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+
+    .guest-role.victim {
+      background: rgba(255, 94, 94, 0.15);
+      color: var(--danger);
+      border: 1px solid rgba(255, 94, 94, 0.25);
+    }
+
+    .guest-role.suspect {
+      background: rgba(245, 196, 83, 0.1);
+      color: var(--accent);
+      border: 1px solid rgba(245, 196, 83, 0.2);
+    }
+
+    .guest-details {
+      display: none;
+      margin: 0;
+      padding-left: 14px;
+      font-size: 11.5px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-top: 8px;
+    }
+
+    .guest-card.expanded .guest-details {
+      display: block;
+    }
+
+    .guest-details li {
+      margin-bottom: 3px;
+    }
+    
+    .guest-details li:last-child {
+      margin-bottom: 0;
+    }
+
+    /* 방탈출 비주얼 장면 스타일 */
+    .scene-container {
+      position: relative;
+      width: 100%;
+      height: 380px;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      margin-bottom: 18px;
+      background: #02060d;
+      user-select: none;
+      box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
+    }
+
+    /* 빗물 효과 레이어 */
+    .rain-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(170deg, rgba(255,255,255,0.01) 0%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0) 100%);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* 각 장소 전경 씬 백그라운드 이미지 */
+    .scene-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.24) contrast(1.15) saturate(0.6);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* 데코레이션 가상 일러스트 조형용 */
+    .deco-bg-line {
+      position: absolute;
+      background: var(--line);
+      opacity: 0.15;
+      pointer-events: none;
+    }
+
+    /* 핫스팟 전체 컨테이너 */
+    .hotspot {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 5;
+    }
+
+    /* 마우스 호버 영역 확장 및 시각 피드백 */
+    .hotspot-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(10, 10, 10, 0.85);
+      border: 2px dashed rgba(255, 60, 60, 0.6);
+      color: var(--accent);
+      font-size: 18px;
+      font-weight: bold;
+      box-shadow: 0 0 15px rgba(255, 60, 60, 0.2);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .hotspot:hover .hotspot-trigger {
+      transform: scale(1.15);
+      border-color: var(--accent);
+      background: rgba(255, 60, 60, 0.2);
+      box-shadow: 0 0 20px rgba(255, 60, 60, 0.6);
+    }
+
+    /* 발견됨 상태 */
+    .hotspot.found .hotspot-trigger {
+      border: 2px solid var(--ok);
+      color: var(--ok);
+      box-shadow: 0 0 15px rgba(137, 211, 153, 0.3);
+      background: rgba(137, 211, 153, 0.15);
+    }
+
+    .hotspot.found:hover .hotspot-trigger {
+      background: rgba(137, 211, 153, 0.25);
+      box-shadow: 0 0 20px rgba(137, 211, 153, 0.6);
+    }
+
+    /* 돋보기 등 심볼 에코드 */
+    .hotspot-icon {
+      pointer-events: none;
+      line-height: 1;
+    }
+
+    /* 아이템 라벨 툴팁 */
+    .hotspot-label {
+      position: absolute;
+      white-space: nowrap;
+      background: rgba(5, 5, 5, 0.95);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 11px;
+      color: var(--text);
+      opacity: 0.65;
+      pointer-events: none;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.8);
+      z-index: 10;
+      transition: opacity 0.2s ease, transform 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+
+    /* label directions to avoid overlap */
+    .hotspot-label.label-bottom {
+      bottom: auto;
+      top: 52px;
+      left: 50%;
+      transform: translate(-50%, -2px);
+    }
+    .hotspot:hover .hotspot-label.label-bottom {
+      transform: translate(-50%, 0);
+    }
+
+    .hotspot-label.label-top {
+      top: auto;
+      bottom: 52px;
+      left: 50%;
+      transform: translate(-50%, 2px);
+    }
+    .hotspot:hover .hotspot-label.label-top {
+      transform: translate(-50%, 0);
+    }
+
+    .hotspot-label.label-left {
+      bottom: auto;
+      right: 52px;
+      left: auto;
+      top: 50%;
+      transform: translate(2px, -50%);
+    }
+    .hotspot:hover .hotspot-label.label-left {
+      transform: translate(0, -50%);
+    }
+
+    .hotspot-label.label-right {
+      bottom: auto;
+      left: 52px;
+      right: auto;
+      top: 50%;
+      transform: translate(-2px, -50%);
+    }
+    .hotspot:hover .hotspot-label.label-right {
+      transform: translate(0, -50%);
+    }
+
+    .hotspot:hover .hotspot-label {
+      opacity: 1;
+      color: var(--accent);
+      border-color: rgba(255, 60, 60, 0.45);
+    }
+
+    .hotspot.found .hotspot-label {
+      border-color: rgba(137, 211, 153, 0.3);
+    }
+
+    .hotspot.found:hover .hotspot-label {
+      color: var(--ok);
+    }
+
+    /* 각 장소별 씬 백그라운드 디자인 */
+    .scene-living {
+      background: 
+        linear-gradient(180deg, rgba(8, 8, 8, 0.95), rgba(2, 2, 2, 0.98)),
+        radial-gradient(circle at 75% 20%, rgba(255, 60, 60, 0.12) 0%, transparent 60%);
+    }
+
+    .scene-kitchen {
+      background: 
+        linear-gradient(180deg, rgba(10, 10, 10, 0.95), rgba(3, 3, 3, 0.98)),
+        radial-gradient(circle at 25% 40%, rgba(255, 60, 60, 0.08) 0%, transparent 50%);
+    }
+
+    .scene-hallway {
+      background: 
+        linear-gradient(180deg, rgba(8, 8, 8, 0.96), rgba(2, 2, 2, 0.99));
+    }
+
+    .scene-karaoke {
+      background: 
+        linear-gradient(180deg, rgba(12, 12, 12, 0.95), rgba(6, 6, 6, 0.98)),
+        radial-gradient(circle at 50% 30%, rgba(255, 60, 60, 0.12) 0%, transparent 60%);
+    }
+
+    .scene-office {
+      background: 
+        linear-gradient(180deg, rgba(8, 8, 8, 0.95), rgba(2, 2, 2, 0.99)),
+        radial-gradient(circle at 35% 35%, rgba(255, 60, 60, 0.1) 0%, transparent 55%);
+    }
+
+    /* 비주얼 일러스트 데코 오브젝트 */
+    .deco-item {
+      position: absolute;
+      border: 1px solid rgba(173, 199, 229, 0.08);
+      background: rgba(255, 255, 255, 0.015);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: rgba(173, 199, 229, 0.25);
+      font-size: 11px;
+      pointer-events: none;
+      box-shadow: inset 0 0 10px rgba(255,255,255,0.01);
+    }
+
+    .log-box {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 17px;
+      background: rgba(0,0,0,0.24);
+      min-height: 122px;
+      line-height: 1.75;
+      white-space: pre-line;
+      word-break: keep-all;
+    }
+
+    .notice {
+      margin-top: 12px;
+      padding: 14px 16px;
+      border-left: 4px solid var(--accent);
+      border-radius: 14px;
+      color: #ffe4a6;
+      background: rgba(241, 201, 107, 0.1);
+      line-height: 1.6;
+      display: none;
+      white-space: pre-line;
+    }
+
+    .notice.show {
+      display: block;
+    }
+
+    .side {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .side-section {
+      padding: 18px;
+    }
+
+    .progress {
+      color: var(--muted);
+      line-height: 1.6;
+      margin: 8px 0 0;
+    }
+
+    .evidence-list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      max-height: 360px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .evidence-card {
+      border: 1px solid rgba(255, 60, 60, 0.22);
+      border-radius: 15px;
+      padding: 12px;
+      background: rgba(255, 60, 60, 0.07);
+    }
+
+    .evidence-card strong {
+      display: block;
+      color: var(--accent);
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    .evidence-card span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .empty {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .talk-list {
+      display: grid;
+      gap: 9px;
+    }
+
+    .talk-area {
+      margin-top: 16px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      border-radius: 18px;
+      padding: 16px;
+      display: none;
+    }
+
+    .talk-area.show {
+      display: block;
+    }
+
+    .talk-area h3 {
+      margin: 0 0 10px;
+      color: var(--accent);
+    }
+
+    .choices {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .final-box {
+      margin-top: 18px;
+      border: 1px solid rgba(226, 120, 120, 0.35);
+      border-radius: 20px;
+      padding: 18px;
+      background: rgba(226, 120, 120, 0.07);
+      display: none;
+    }
+
+    .final-box.show {
+      display: block;
+    }
+
+    .final-box h3 {
+      margin-top: 0;
+      color: var(--danger);
+    }
+
+    .accuse-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .accuse-btn {
+      border-color: rgba(226, 120, 120, 0.24);
+    }
+
+    .ending {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      background: rgba(2, 6, 13, 0.9);
+      backdrop-filter: blur(12px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .ending.show {
+      display: flex;
+    }
+
+    .ending-card {
+      width: min(760px, 100%);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      padding: 28px;
+      background: linear-gradient(180deg, rgba(16, 30, 52, 0.98), rgba(5, 9, 16, 0.98));
+      box-shadow: var(--shadow);
+    }
+
+    .ending-card h2 {
+      margin: 0 0 12px;
+      font-size: 32px;
+    }
+
+    .ending-card p {
+      line-height: 1.85;
+      color: var(--text);
+      white-space: pre-line;
+      word-break: keep-all;
+    }
+
+    .ending-card.success h2 {
+      color: var(--ok);
+    }
+
+    .ending-card.fail h2 {
+      color: var(--danger);
+    }
+
+    .primary-btn {
+      margin-top: 12px;
+      background: rgba(255, 60, 60, 0.14);
+      color: var(--accent);
+      border-color: rgba(255, 60, 60, 0.4);
+      font-weight: 800;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--accent);
+      background: rgba(255, 60, 60, 0.1);
+      border: 1px solid rgba(255, 60, 60, 0.2);
+      margin-top: 10px;
+    }
+
+      @media (max-width: 900px) {
+        header {
+          grid-template-columns: 1fr;
+        }
+
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        .object-grid,
+        .accuse-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .reset-btn {
+          min-height: 48px;
+        }
+      }
+
+      /* ==============================================================
+         CINEMATIC CINEMA DECORATIONS & HORROR OVERLAYS
+         ============================================================== */
+      .opening-sequence-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        background: #020409;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        color: #fff;
+        opacity: 1;
+        transition: opacity 1.2s ease-in-out, visibility 1.2s;
+      }
+
+      .op-screen {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        box-sizing: border-box;
+      }
+
+      .vhs-container {
+        position: relative;
+        width: min(860px, 100%);
+        height: min(520px, 80%);
+        background: #040810;
+        border: 2px solid rgba(255, 94, 94, 0.15);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 0 80px rgba(0,0,0,0.95);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .vhs-noise {
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 2px);
+        pointer-events: none;
+        z-index: 10;
+        opacity: 0.85;
+        animation: vhs-scroll 6s linear infinite;
+      }
+
+      @keyframes vhs-scroll {
+        from { background-position: 0 0; }
+        to { background-position: 0 480px; }
+      }
+
+      .vhs-glitch-line {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 10px;
+        background: rgba(255, 255, 255, 0.08);
+        filter: blur(2px);
+        pointer-events: none;
+        z-index: 11;
+        opacity: 0.6;
+        animation: glitch-line 3.5s linear infinite;
+      }
+
+      @keyframes glitch-line {
+        0% { top: -10%; }
+        100% { top: 110%; }
+      }
+
+      .vhs-overlay-text {
+        position: absolute;
+        top: 24px;
+        left: 24px;
+        font-family: monospace;
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.5);
+        z-index: 12;
+        letter-spacing: 0.1em;
+        font-weight: bold;
+      }
+
+      .rec-dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background: #ff4747;
+        border-radius: 50%;
+        margin-right: 8px;
+        animation: blink 1s steps(2, start) infinite;
+      }
+
+      @keyframes blink {
+        to { visibility: hidden; }
+      }
+
+      .op-slide {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        inset: 0;
+        padding: 32px;
+        box-sizing: border-box;
+        opacity: 0;
+        transition: opacity 0.8s ease-in-out;
+        z-index: 5;
+      }
+
+      .op-slide.active {
+        opacity: 1;
+        z-index: 6;
+      }
+
+      .op-slide-scroll {
+        overflow-y: auto !important;
+        justify-content: flex-start !important;
+        padding: 24px 32px !important;
+      }
+
+      .guest-grid-cinematic {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        margin-bottom: 24px;
+      }
+      @media (max-width: 600px) {
+        .guest-grid-cinematic {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .pension-trip-visual {
+        position: relative;
+        width: 85%;
+        height: 55%;
+        max-height: 250px;
+        border: 10px solid #f2f5fa;
+        background: #03060c;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.9);
+        transform: rotate(-1.5deg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        animation: slow-photo-tilt 6s ease-in-out infinite alternate;
+      }
+
+      @keyframes slow-photo-tilt {
+        0% { transform: scale(1.01) rotate(-1.5deg); }
+        100% { transform: scale(1.04) rotate(1.5deg); }
+      }
+
+      .silhouette-group {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(180deg, #0d1629 0%, #03050a 100%);
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 16px;
+        padding-bottom: 24px;
+        box-sizing: border-box;
+      }
+
+      .peer-silhouette {
+        width: 44px;
+        height: 110px;
+        background: rgba(255,255,255,0.05);
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+        box-shadow: 0 0 20px rgba(255,255,255,0.08);
+        position: relative;
+      }
+
+      .peer-head {
+        width: 30px;
+        height: 30px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 50%;
+        position: absolute;
+        top: -36px;
+        left: 7px;
+        box-shadow: 0 0 20px rgba(255,255,255,0.08);
+      }
+
+      .subtitle-overlay {
+        position: absolute;
+        bottom: 36px;
+        left: 20px;
+        right: 20px;
+        text-align: center;
+        font-size: 16px;
+        line-height: 1.7;
+        color: #eaeaea;
+        text-shadow: 2px 2px 10px #000, 0 0 15px rgba(0,0,0,0.9);
+        word-break: keep-all;
+        letter-spacing: 0.05em;
+      }
+
+      .scream-text {
+        font-family: 'East Sea Dokdo', sans-serif;
+        font-size: 84px;
+        color: #ff3c3c;
+        text-shadow: 0 0 20px rgba(255, 60, 60, 0.9), 0 0 40px #000;
+        animation: rapid-shake 0.1s infinite;
+        letter-spacing: 0.15em;
+      }
+
+      @keyframes rapid-shake {
+        0% { transform: translate(3px, -2px) rotate(-1deg); }
+        20% { transform: translate(-2px, 3px) rotate(1deg); }
+        40% { transform: translate(4px, 1px) rotate(-1.5deg); }
+        60% { transform: translate(-3px, -3px) rotate(1.5deg); }
+        80% { transform: translate(-1px, 2px) rotate(0deg); }
+        100% { transform: translate(2px, -1px) rotate(-1deg); }
+      }
+
+      .whisper-text {
+        font-size: 26px;
+        letter-spacing: 0.3em;
+        color: #ff5e5e;
+        text-shadow: 0 0 15px rgba(255,94,94,0.7);
+        animation: whisper-fade 1.8s ease-in-out infinite alternate;
+        font-weight: bold;
+      }
+
+      @keyframes whisper-fade {
+        0% { opacity: 0.4; filter: blur(1px); }
+        100% { opacity: 1; filter: blur(0); }
+      }
+
+      .title-reveal {
+        text-align: center;
+        animation: slow-fade-in 2.2s ease-out forwards;
+      }
+
+      @keyframes slow-fade-in {
+        from { opacity: 0; transform: scale(0.96); filter: blur(8px); }
+        to { opacity: 1; transform: scale(1); filter: blur(0); }
+      }
+
+      .creepy-title {
+        font-family: 'East Sea Dokdo', sans-serif;
+        font-size: 78px;
+        color: #fff;
+        text-shadow: 0 0 20px rgba(255,255,255,0.3), 0 0 40px #ff3c3c;
+        margin-bottom: 24px;
+        letter-spacing: 0.08em;
+      }
+
+      .enter-btn {
+        padding: 13px 28px;
+        font-family: 'Nanum Myeongjo', serif;
+        background: rgba(255, 60, 60, 0.16);
+        border: 1px solid rgba(255, 60, 60, 0.5);
+        color: #fff;
+        font-size: 15px;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(255, 60, 60, 0.25);
+        letter-spacing: 0.1em;
+      }
+
+      .enter-btn:hover {
+        background: #ff3c3c;
+        border-color: #ff3c3c;
+        box-shadow: 0 0 25px rgba(255, 60, 60, 0.6);
+        transform: translateY(-2px);
+      }
+
+      @keyframes lightning-flash {
+        0%, 100% { background-color: transparent; }
+        5%, 15% { background-color: rgba(240, 248, 255, 0.95); }
+        9% { background-color: rgba(220, 235, 255, 0.4); }
+      }
+      .flash-active {
+        animation: lightning-flash 0.7s ease-out;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Full-screen lightning flashing overlay -->
+    <div id="lightningFlash" style="position: fixed; inset: 0; pointer-events: none; z-index: 9999; background: transparent;"></div>
+
+    <!-- Retro interactive opening cinematic sequence simulator -->
+    <div id="openingSequence" class="opening-sequence-overlay">
+      <div class="op-screen">
+        <div class="vhs-container">
+          <div id="vhsNoise" class="vhs-noise"></div>
+          <div class="vhs-glitch-line"></div>
+          <div class="vhs-overlay-text"><span class="rec-dot"></span>REC 🔴 PLAY 00:00:02</div>
+          
+          <!-- Phase 1 Slide: Touch start/Unmute authorization -->
+          <div id="opSlideStart" class="op-slide active" style="background: #020408; justify-content: center;">
+            <h2 style="font-family: 'Nanum Myeongjo', serif; font-size: 32px; line-height: 1.6; margin-bottom: 24px; color: #ff5e5e; font-weight: 800; text-shadow: 0 0 10px rgba(255, 94, 94, 0.45); letter-spacing: 0.05em;">
+              흔들다리 펜션
+            </h2>
+            <p style="font-size: 13px; line-height: 1.8; color: var(--muted); text-align: center; margin-bottom: 40px; word-break: keep-all; max-width: 460px;">
+              본 게임은 극도의 음산한 미스터리 분위기를 포함하고 있습니다.<br>
+              스토리와 힌트의 몰입도를 높이기 위해 <strong>사운드(이어폰)</strong> 착용을 권장합니다.
+            </p>
+            <button onclick="startCinematic()" class="enter-btn" style="width: min(340px, 100%);">
+              🔊 오프닝 감상 & 게임 시작
+            </button>
+          </div>
+
+          <!-- Phase 2 Slide: 5 seconds trip representation -->
+          <div id="opSlideTrip" class="op-slide" style="background: #010204;">
+            <div class="pension-trip-visual">
+              <div class="silhouette-group">
+                <div style="position: absolute; inset: 0; background: rgba(255, 94, 94, 0.08); border-radius: 8px; z-index: 2; pointer-events: none;"></div>
+                <div style="position: absolute; top: 12px; left: 16px; font-family: monospace; font-size: 9px; color: rgba(255,255,255,0.3); z-index: 3;">Polaroid Cam® / 2026. 05. 24</div>
+                <div class="peer-silhouette" style="height: 125px;">
+                  <div class="peer-head"></div>
+                  <span style="position: absolute; bottom: -20px; left:0; width:100%; text-align:center; font-size:9px; color:rgba(255,255,255,0.4);">서희</span>
+                </div>
+                <div class="peer-silhouette" style="height: 145px; background: rgba(255,255,255,0.08);">
+                  <div class="peer-head"></div>
+                  <span style="position: absolute; bottom: -20px; left:0; width:100%; text-align:center; font-size:9px; color:rgba(255,255,255,0.4);">은서</span>
+                </div>
+                <div class="peer-silhouette" style="height: 130px;">
+                  <div class="peer-head"></div>
+                  <span style="position: absolute; bottom: -20px; left:0; width:100%; text-align:center; font-size:9px; color:rgba(255,255,255,0.4);">가현</span>
+                </div>
+                <div class="peer-silhouette" style="height: 140px; background: rgba(255,255,255,0.07);">
+                  <div class="peer-head"></div>
+                  <span style="position: absolute; bottom: -20px; left:0; width:100%; text-align:center; font-size:9px; color:rgba(255,255,255,0.4);">하경</span>
+                </div>
+              </div>
+            </div>
+            <div class="subtitle-overlay" id="tripSubtitle">
+              2026년 5월... 우리는 오랜만에 다 함께 모여 흔들다리 펜션으로 여행을 떠났다.
+            </div>
+          </div>
+
+          <!-- Phase 3 Slide: 2 seconds scream representation -->
+          <div id="opSlideScream" class="op-slide" style="background: #000; justify-content: center;">
+            <div class="scream-text">꺄아아아아악!!!</div>
+            <div class="subtitle-overlay" style="color: #ff5e5e; font-size: 15px;">
+              폭우가 거세지던 한밤중, 펜션을 뒤흔든 은서의 날카로운 비명소리.
+            </div>
+          </div>
+
+          <!-- Phase 4 Slide: 2 seconds whisper "너만 조용히 하면 돼..." -->
+          <div id="opSlideWhisper" class="op-slide" style="background: #010102; justify-content: center;">
+            <div class="whisper-text">“너만 조용히 하면 돼...”</div>
+            <div class="subtitle-overlay" style="color: #ff3c3c; font-size: 15px;">
+              빗물 사이로 얼어붙을 듯한 음산한 혼잣말이 차갑게 들려온다.
+            </div>
+          </div>
+
+          <!-- Phase 5 Slide: Title fade-in -->
+          <div id="opSlideTitle" class="op-slide" style="background: #03050a; justify-content: center;">
+            <div class="title-reveal">
+              <div class="creepy-title">흔들다리 펜션</div>
+              <p style="font-size: 14px; margin-bottom: 28px; color: var(--muted); word-break: keep-all; line-height: 1.8; max-width: 480px;">
+                은서를 죽인 진범을 찾고, 폭우로 고립된 펜션에서 탈출하라.<br>
+                당신의 형사 본능만이 진실을 밝혀낼 수 있습니다.
+              </p>
+              <button onclick="goToGuestList()" class="enter-btn" style="border-radius: 20px; min-width: 200px;">
+                🔍 수사 준비하기 (Next)
+              </button>
+            </div>
+          </div>
+
+          <!-- Phase 6 Slide: Pension Guest List Setup -->
+          <div id="opSlideGuestList" class="op-slide op-slide-scroll" style="background: #000; display: none;">
+            <div style="width: 100%; max-width: 720px; margin: auto; text-align: left;">
+              <h2 style="font-family: 'Nanum Myeongjo', serif; font-size: 24px; color: #ff5e5e; margin-bottom: 18px; border-bottom: 1px solid rgba(255, 94, 94, 0.3); padding-bottom: 8px; font-weight: 800; letter-spacing: 0.05em; text-align: center;">
+                👥 펜션 투숙객 명단
+              </h2>
+              
+              <div class="guest-grid-cinematic">
+                <!-- 정은서 -->
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255, 94, 94, 0.25); border-radius: 10px; padding: 14px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 4px;">
+                    <strong style="color: #fff; font-size: 14px;">정은서</strong>
+                    <span style="font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; background: rgba(255, 94, 94, 0.15); color: #ff5e5e; border: 1px solid rgba(255, 94, 94, 0.25);">피해자 (22세)</span>
+                  </div>
+                  <ul style="margin: 0; padding-left: 14px; font-size: 11.5px; color: #b0b8c4; line-height: 1.5; list-style-type: disc;">
+                    <li>병적인 완벽주의자.</li>
+                    <li>이번 여행을 직접 기획하고 일정표를 짰다.</li>
+                    <li>거실에서 사체로 발견.</li>
+                    <li style="color: #ff9191;">친구들의 일거수일투족을 1분 단위로 통제하려 했다.</li>
+                  </ul>
+                </div>
+
+                <!-- 이서희 -->
+                <div style="background: rgba(255,255,255,0.015); border: 1px solid rgba(255, 60, 60, 0.22); border-radius: 10px; padding: 14px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 4px;">
+                    <strong style="color: #fff; font-size: 14px;">이서희</strong>
+                    <span style="font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; background: rgba(255, 60, 60, 0.12); color: #ff5e5e; border: 1px solid rgba(255, 60, 60, 0.22);">용의자 1 (22세)</span>
+                  </div>
+                  <ul style="margin: 0; padding-left: 14px; font-size: 11.5px; color: #b0b8c4; line-height: 1.5; list-style-type: disc;">
+                    <li>은서의 통제에 질린 냉소주의자.</li>
+                    <li style="color: #ff9d9d;">특징: 서희의 노트북에 CCTV 사각지대 검색기록이 있다.</li>
+                  </ul>
+                </div>
+
+                <!-- 전가현 -->
+                <div style="background: rgba(255,255,255,0.015); border: 1px solid rgba(255, 60, 60, 0.22); border-radius: 10px; padding: 14px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 4px;">
+                    <strong style="color: #fff; font-size: 14px;">전가현</strong>
+                    <span style="font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; background: rgba(255, 60, 60, 0.12); color: #ff5e5e; border: 1px solid rgba(255, 60, 60, 0.22);">용의자 2 (22세)</span>
+                  </div>
+                  <ul style="margin: 0; padding-left: 14px; font-size: 11.5px; color: #b0b8c4; line-height: 1.5; list-style-type: disc;">
+                    <li>극심한 고소공포증 보유자.</li>
+                    <li>흔들다리 펜션을 예약한 은서와 갈등이 있었다.</li>
+                    <li style="color: #ff9d9d;">특징: 가현의 키티 키링이 흔들다리 난간에서 발견된다.</li>
+                  </ul>
+                </div>
+
+                <!-- 최하경 -->
+                <div style="background: rgba(255,255,255,0.015); border: 1px solid rgba(255, 60, 60, 0.22); border-radius: 10px; padding: 14px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 4px;">
+                    <strong style="color: #fff; font-size: 14px;">최하경</strong>
+                    <span style="font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; background: rgba(255, 60, 60, 0.12); color: #ff5e5e; border: 1px solid rgba(255, 60, 60, 0.22);">용의자 3 (22세)</span>
+                  </div>
+                  <ul style="margin: 0; padding-left: 14px; font-size: 11.5px; color: #b0b8c4; line-height: 1.5; list-style-type: disc;">
+                    <li>말을 돌려서 하고 빡빡한 계획을 싫어함.</li>
+                    <li>차분하고 긍정적.</li>
+                    <li style="color: #ff9d9d;">특징: 향에 예민함. 사건 당시 노래방에 있었다고 진술.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div style="text-align: center; margin-top: 10px;">
+                <button onclick="goToGuestTalks()" class="enter-btn" style="min-width: 240px; border-radius: 20px;">
+                  다음: 투숙객 대화 확인하기 ➡️
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Phase 7 Slide: Dialogue with Guests -->
+          <div id="opSlideGuestTalks" class="op-slide op-slide-scroll" style="background: #000; display: none;">
+            <div style="width: 100%; max-width: 720px; margin: auto; text-align: left;">
+              <h2 style="font-family: 'Nanum Myeongjo', serif; font-size: 24px; color: #ff5e5e; margin-bottom: 12px; border-bottom: 1px solid rgba(255, 94, 94, 0.3); padding-bottom: 8px; font-weight: 800; letter-spacing: 0.05em; text-align: center;">
+                🗣️ 투숙객들과의 대화
+              </h2>
+              <p style="font-size: 12.5px; color: var(--muted); margin-bottom: 16px; text-align: center;">
+                용의자 버튼들을 눌러 사건 직후 최초 대화 진술을 확인하십시오.
+              </p>
+
+              <!-- Tab Navigation -->
+              <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+                <button id="cinTalkTab_seohee" onclick="selectCinTalk('seohee')" style="flex: 1; min-height: 48px; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; border-radius: 12px; font-weight: bold; font-size: 13px; color: #fff; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: all 0.2s;">
+                  👩‍💼 이서희 (용의자 1)
+                </button>
+                <button id="cinTalkTab_gahyun" onclick="selectCinTalk('gahyun')" style="flex: 1; min-height: 48px; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; border-radius: 12px; font-weight: bold; font-size: 13px; color: #fff; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: all 0.2s;">
+                  👩‍🎨 전가현 (용의자 2)
+                </button>
+                <button id="cinTalkTab_hakyeong" onclick="selectCinTalk('hakyeong')" style="flex: 1; min-height: 48px; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; border-radius: 12px; font-weight: bold; font-size: 13px; color: #fff; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: all 0.2s;">
+                  👩‍🎤 최하경 (용의자 3)
+                </button>
+              </div>
+
+              <!-- Content Box -->
+              <div id="cinDialogueBox" style="min-height: 150px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255, 60, 60, 0.25); border-radius: 14px; padding: 18px; margin-bottom: 20px; position: relative; box-sizing: border-box;">
+                <div id="cinDialogueSpeaker" style="font-family: 'Nanum Myeongjo', serif; font-size: 14px; font-weight: bold; color: var(--accent); margin-bottom: 8px;">용의자를 선택하십시오</div>
+                <div id="cinDialogueText" style="font-size: 13px; line-height: 1.8; color: #eaeaea; word-break: keep-all; white-space: pre-wrap;">상단의 용의자 버튼들을 각각 클릭해서 진술을 기록해보세요. 세 명의 진술을 모두 확인해야 다음으로 진행할 수 있습니다.</div>
+              </div>
+
+              <div style="text-align: center;">
+                <button id="cinDialogueNextBtn" onclick="goToGameStart()" class="enter-btn" style="min-width: 240px; border-radius: 20px; opacity: 0.4; pointer-events: none;" title="모든 용의자와의 진술을 먼저 확인해보세요.">
+                  다음 단계 ➡️
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Phase 8 Slide: Game Start Screen -->
+          <div id="opSlideGameStart" class="op-slide" style="background: #03050a; justify-content: center; display: none;">
+            <div class="title-reveal" style="width: 100%; max-width: 520px; text-align: center; margin: auto;">
+              <h2 style="font-family: 'East Sea Dokdo', sans-serif; font-size: 64px; color: #ff3c3c; text-shadow: 0 0 20px rgba(255, 60, 60, 0.8); margin-bottom: 12px; letter-spacing: 0.05em;">
+                사건 수사 개시
+              </h2>
+              <div style="margin-bottom: 24px; line-height: 1.8; font-size: 13px; color: #ccc; word-break: keep-all; text-align: center; border: 1px solid rgba(255, 94, 94, 0.2); background: rgba(255, 60, 60, 0.04); padding: 16px 20px; border-radius: 12px;">
+                <p style="margin: 0 0 8px 0; color: #fff; font-weight: bold; font-size: 14px;">📍 펜션 내 긴급 격리 상태</p>
+                현재 폭우로 인해 모든 유선 연결망과 전기가 고립되었습니다.<br>
+                유일한 외부 대피소이자 도주로인 흔들다리가 유실되기 일보 직전입니다.<br>
+                경찰 수색대가 당도하기 전에 현장에 남겨진 힌트들을 정밀 수사하십시오.
+              </div>
+              <button onclick="dismissCinematic()" class="enter-btn" style="border-radius: 20px; min-width: 250px; font-size: 15px; padding: 12px 30px; box-shadow: 0 0 30px rgba(255, 60, 60, 0.45);">
+                🔍 수사 시작하기 (Start Game)
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="app">
+      <header>
+        <div class="title-box">
+          <p class="eyebrow" style="color: var(--danger); font-weight: bold; letter-spacing: 0.15em;">🩸 MYSTERY ESCAPE HORROR</p>
+          <h1 style="color: #fff; font-family: 'Nanum Myeongjo', serif; text-shadow: 0 0 10px rgba(255,255,255,0.15);">흔들다리 펜션</h1>
+          <p class="subtitle">은서를 죽인 진범을 찾고, 폭우로 고립된 펜션에서 탈출하라.</p>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px; justify-content: space-between; align-items: flex-end;">
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <div id="gameTimer" style="background: rgba(255,94,94,0.1); border: 1px solid rgba(255,94,94,0.25); padding: 8px 14px; border-radius: 12px; font-family: monospace; font-size: 13px; color: var(--danger); font-weight: bold; display: flex; align-items: center; gap: 6px;">
+              ⏱️ 소요 시간: 00:00
+            </div>
+            <button id="audioToggleBtn" onclick="toggleSpookyAudio()" style="background: rgba(255, 60, 60, 0.1); border: 1px solid rgba(255, 60, 60, 0.3); padding: 8px 14px; border-radius: 12px; font-size: 13px; color: var(--accent); cursor: pointer; font-weight: bold; min-height: 38px;">
+              🔊 사운드 ON
+            </button>
+          </div>
+          <button class="reset-btn" onclick="restartGame()" style="align-self: flex-end;">처음부터 다시</button>
+        </div>
+      </header>
+
+    <div class="layout">
+      <main class="panel main-panel">
+        <div class="panel-head">
+          <h2 id="roomTitle">거실</h2>
+          <p id="roomDesc" class="room-desc"></p>
+          <span id="roomBadge" class="badge">현재 조사 구역</span>
+        </div>
+
+        <div class="content">
+          <nav id="roomNav" class="rooms"></nav>
+
+          <section>
+            <!-- 2D 룸 비주얼 일러스트 레이아웃 박스 -->
+            <div id="roomScene" class="scene-container">
+              <div class="rain-overlay"></div>
+              <!-- 동적으로 인테리어 데코 및 핫스팟이 이곳에 생성됨 -->
+            </div>
+            <div id="resultBox" class="log-box"></div>
+            <div id="noticeBox" class="notice"></div>
+          </section>
+
+          <div id="talkArea" style="display: none !important;">
+            <h3 id="talkName"></h3>
+            <div id="talkIntro"></div>
+            <div id="talkChoices"></div>
+          </div>
+
+          <section id="finalBox" class="final-box">
+            <h3>최종 범인 지목</h3>
+            <p class="room-desc">증거는 충분하다. 이제 누구를 범인으로 지목할지 선택해야 한다.</p>
+            <div class="accuse-grid">
+              <button class="accuse-btn" onclick="accuse('seohee')">이서희</button>
+              <button class="accuse-btn" onclick="accuse('gahyun')">전가현</button>
+              <button class="accuse-btn" onclick="accuse('hakyeong')">최하경</button>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <aside class="side">
+        <section class="panel side-section">
+          <h3>진행 상황</h3>
+          <p id="progressText" class="progress"></p>
+        </section>
+
+        <section class="panel side-section" style="max-height: 480px; overflow-y: auto;">
+          <h3>👥 펜션 투숙객 명단 <span style="font-size: 11px; font-weight: normal; color: var(--muted); display: block; margin-top: 4px;">클릭하여 상세 정보 확인</span></h3>
+          <div class="guest-list">
+            <!-- 정은서 -->
+            <div class="guest-card" onclick="toggleGuestDetails(this)">
+              <div class="guest-name">
+                <span>정은서 ▾</span>
+                <span class="guest-role victim">피해자 (22세)</span>
+              </div>
+              <ul class="guest-details">
+                <li>병적인 완벽주의자.</li>
+                <li>이번 여행을 직접 기획하고 일정표를 짰다.</li>
+                <li>거실에서 사체로 발견.</li>
+                <li>특징: 친구들의 일거수일투족을 1분 단위로 통제하려 했다.</li>
+              </ul>
+            </div>
+            <!-- 이서희 -->
+            <div class="guest-card" onclick="toggleGuestDetails(this)">
+              <div class="guest-name">
+                <span>이서희 ▾</span>
+                <span class="guest-role suspect">용의자 1 (22세)</span>
+              </div>
+              <ul class="guest-details">
+                <li>은서의 통제에 질린 냉소주의자.</li>
+                <li>특징: 서희의 노트북에 CCTV 사각지대 검색기록이 있다.</li>
+              </ul>
+            </div>
+            <!-- 전가현 -->
+            <div class="guest-card" onclick="toggleGuestDetails(this)">
+              <div class="guest-name">
+                <span>전가현 ▾</span>
+                <span class="guest-role suspect">용의자 2 (22세)</span>
+              </div>
+              <ul class="guest-details">
+                <li>극심한 고소공포증 보유자.</li>
+                <li>흔들다리 펜션을 예약한 은서와 갈등이 있었다.</li>
+                <li>특징: 가현의 키티 키링이 흔들다리 난간에서 발견된다.</li>
+              </ul>
+            </div>
+            <!-- 최하경 -->
+            <div class="guest-card" onclick="toggleGuestDetails(this)">
+              <div class="guest-name">
+                <span>최하경 ▾</span>
+                <span class="guest-role suspect">용의자 3 (22세)</span>
+              </div>
+              <ul class="guest-details">
+                <li>말을 돌려서 하고 빡빡한 계획을 싫어함.</li>
+                <li>차분하고 긍정적.</li>
+                <li>특징: 향에 예민함. 사건 당시 노래방에 있었다고 진술.</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel side-section">
+          <h3>획득한 증거</h3>
+          <div id="evidenceList" class="evidence-list"></div>
+        </section>
+      </aside>
+    </div>
+
+  <!-- 엔딩 오버레이 -->
+  <div id="endingOverlay" class="ending">
+    <div id="endingCard" class="ending-card">
+      <h2 id="endingTitle"></h2>
+      <p id="endingText"></p>
+      <button class="primary-btn" onclick="restartGame()">처음부터 다시 시작</button>
+    </div>
+  </div>
+
+  <!-- 음향 기기 암호 모달 (cipherModal) -->
+  <div id="cipherModal" class="ending">
+    <div class="ending-card" style="border-color: var(--accent); max-width: 540px;">
+      <h2 style="color: var(--accent); display: flex; align-items: center; gap: 8px; font-size: 24px; margin-bottom: 16px;">
+        🔐 음향 기기 마스터 락 해제
+      </h2>
+      <p style="margin-bottom: 16px; line-height: 1.6; font-size: 14px; color: var(--text);">
+        사건 전날인 ‘목요일’에 노래방을 이용한 사람이 누구인지 알아내야 마스터 락이 해제됩니다.
+      </p>
+      
+      <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin-bottom: 20px; font-size: 13.5px; line-height: 1.7; color: var(--text); text-align: left;">
+        <div style="text-align: center; font-weight: bold; color: var(--accent); margin-bottom: 12px; font-size: 15px;">[ 문제 ]</div>
+        <p style="margin-bottom: 14px; color: var(--muted); font-size: 13px; line-height: 1.5; word-break: keep-all;">
+          훼손된 노래방 이용 로그에 화요일부터 금요일까지의 기록이 꼬여서 남아 있다. 다음 단서들을 조합하여 목요일에 노래방을 이용한 사람의 이름을 쓰시오.
+        </p>
+        
+        <div style="background: rgba(255,255,255,0.03); border: 1px dashed rgba(226, 60, 60, 0.3); border-radius: 8px; padding: 12px; margin-bottom: 14px;">
+          <div style="font-weight: 700; color: var(--accent); font-size: 13px; margin-bottom: 6px;">[ 요일별 노래방 이용자 ]</div>
+          <ul style="list-style: none; padding: 0; margin: 0; font-family: monospace; font-size: 13px; line-height: 1.6;">
+            <li>• 화요일: [ ? ]</li>
+            <li>• 수요일: [ ? ]</li>
+            <li style="color: var(--accent); font-weight: bold;">• 목요일(사건 전날): [ ? ]</li>
+            <li>• 금요일(사건 당일): [ 최하경 ]</li>
+          </ul>
+        </div>
+        
+        <div style="font-size: 12px; color: var(--muted); line-height: 1.6; word-break: keep-all;">
+          <div style="font-weight: 700; color: var(--text); margin-bottom: 4px;">[ 단서 및 규칙 ]</div>
+          1. 화요일부터 금요일까지 정은서, 이서희, 전가현, 최하경이 각각 서로 다른 요일에 한 번씩만 노래방을 이용했다.<br>
+          2. 고소공포증이 심한 전가현은 수요일에 흔들다리 앞에서 공황 증세를 겪은 후, 그 다음 날인 목요일에는 무서워서 하루 종일 지하 노래방을 포함해 방 밖으로 전혀 나오지 못했다.<br>
+          3. 병적인 완벽주의자 정은서는 자신이 직접 기획한 목요일 일정표를 점검하느라 바빴기 때문에, 가현이가 노래방을 이용한 요일보다 무조건 하루 '앞선' 요일에 노래방을 이용했다.<br>
+          4. 냉소주의자 이서희는 은서가 노래방을 이용한 날에는 은서와 마주치기 싫어서 절대 지하로 내려가지 않았다.
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+        <input type="text" id="cipherInput" placeholder="답 입력 (이름)" onkeydown="if(event.key === 'Enter') submitCipher()"
+               style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: rgba(5,9,16,0.8); color: var(--text); font-size: 16px; text-align: center;">
+        <button class="primary-btn" onclick="submitCipher()" style="margin: 0; padding: 0 24px; min-height: 48px; border-radius: 12px;">확인</button>
+      </div>
+      
+      <div id="cipherFeedback" style="color: var(--danger); font-size: 13px; min-height: 20px; margin-bottom: 20px; text-align: center; font-weight: 600;"></div>
+      
+      <div style="display: flex; justify-content: flex-end;">
+        <button class="object-btn" onclick="closeCipherModal()" style="border-radius: 12px; font-size: 13px; padding: 8px 16px;">돌아가기</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="pastAccidentModal" class="ending">
+    <div class="ending-card" style="border-color: var(--accent); max-width: 480px;">
+      <h2 style="color: var(--accent); display: flex; align-items: center; gap: 8px; font-size: 24px; margin-bottom: 16px;">
+        🔐 문서 보안 암호
+      </h2>
+      <p style="margin-bottom: 20px; line-height: 1.6; font-size: 14px; color: var(--text);">
+        파일 제목: <strong>[흔들다리 추락 사고 보고서]</strong><br><br>
+        문서를 열려고 하자 비밀번호 입력창이 나타난다.
+      </p>
+      
+      <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+        <div style="font-size: 13px; line-height: 1.6; color: var(--muted); text-align: center; margin-bottom: 10px;">
+          2023년 / 21:13 / 목격자 2명
+        </div>
+        <div style="font-size: 13px; color: var(--muted); text-align: center; margin-bottom: 10px;">
+          입력 형식: 숫자 4자리
+        </div>
+        <div style="font-size: 14px; line-height: 1.8; color: var(--danger); font-family: monospace; font-weight: bold; text-align: center; border-top: 1px dashed var(--line); padding-top: 10px;">
+          힌트: 사고 발생 연도, 사고 시간, 목격자 수
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+        <input type="text" id="pastAccidentInput" placeholder="비밀번호 4자리 입력" onkeydown="if(event.key === 'Enter') submitPastAccident()"
+               style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: rgba(5,9,16,0.8); color: var(--text); font-family: monospace; font-size: 16px; text-align: center;">
+        <button class="primary-btn" onclick="submitPastAccident()" style="margin: 0; padding: 0 24px; min-height: 48px; border-radius: 12px;">확인</button>
+      </div>
+      
+      <div id="pastAccidentFeedback" style="color: var(--danger); font-size: 13px; min-height: 20px; margin-bottom: 20px; text-align: center; font-weight: 600;"></div>
+      
+      <div style="display: flex; justify-content: flex-end;">
+        <button class="object-btn" onclick="closePastAccidentModal()" style="border-radius: 12px; font-size: 13px; padding: 8px 16px;">돌아가기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 카드키 로그 복구 모달 (logRestoreModal) -->
+  <div id="logRestoreModal" class="ending">
+    <div class="ending-card" style="border-color: var(--accent); max-width: 480px;">
+      <h2 style="color: var(--accent); display: flex; align-items: center; gap: 8px; font-size: 24px; margin-bottom: 16px;">
+        💻 카드키 로그 복구 프로그램
+      </h2>
+      <p style="margin-bottom: 16px; line-height: 1.6; font-size: 14px; color: var(--text);">
+        복구 프로그램 화면에는 깨진 로그 데이터가 표시되어 있다.
+      </p>
+      
+      <div style="background: rgba(0,0,0,0.5); border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin-bottom: 20px; font-family: monospace; font-size: 13px; line-height: 1.7; color: #33ff33; text-shadow: 0 0 5px rgba(51,255,51,0.2);">
+        <div style="color: var(--accent); font-weight: bold; margin-bottom: 8px; text-shadow: none;">[복구 가능 데이터 37%]</div>
+        20:15 - 0호실 퇴장<br>
+        20:18 - ???<br>
+        20:24 - 거실 근처 감지<br>
+        20:31 - 기록 손상<br>
+        20:40 - 노래방 전원 ON<br>
+        20:41 - 반복 재생 활성화<br>
+        20:43 - ???<br>
+        20:51 - 3호실 근처 감지<br>
+        21:02 - 기록 손상<br>
+        21:15 - 0호실 복귀
+      </div>
+
+      <div style="font-size: 14px; color: var(--text); margin-bottom: 12px; font-weight: 500;">
+        '삭제된 데이터를 복구하려면 비밀번호를 입력하시오.'
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+        <input type="text" id="logRestoreInput" placeholder="비밀번호 입력" onkeydown="if(event.key === 'Enter') submitLogRestore()"
+               style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: rgba(5,9,16,0.8); color: var(--text); font-family: monospace; font-size: 16px; text-align: center;">
+        <button class="primary-btn" onclick="submitLogRestore()" style="margin: 0; padding: 0 24px; min-height: 48px; border-radius: 12px;">확인</button>
+      </div>
+      
+      <div id="logRestoreFeedback" style="color: var(--danger); font-size: 13px; min-height: 20px; margin-bottom: 20px; text-align: center; font-weight: 600;"></div>
+      
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 12px; color: var(--danger); font-weight: bold; font-family: monospace;">hint: 20:18 ↔ 20:43</span>
+        <button class="object-btn" onclick="closeLogRestoreModal()" style="border-radius: 12px; font-size: 13px; padding: 8px 16px;">돌아가기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 거실 카드키 암호 모달 (cardkeyPuzzleModal) -->
+  <div id="cardkeyPuzzleModal" class="ending">
+    <div class="ending-card" style="border-color: var(--accent); max-width: 480px;">
+      <h2 style="color: var(--accent); display: flex; align-items: center; gap: 8px; font-size: 24px; margin-bottom: 16px;">
+        🔐 이서희 카드키 조사
+      </h2>
+      <p style="margin-bottom: 16px; line-height: 1.6; font-size: 14px; color: var(--text);">
+        카드키에 검붉은 오염물이 눌러붙어 있어 잘 보이지 않습니다. 오염물 사이에 방 번호와 의문의 자국이 가려져 있습니다.
+      </p>
+      
+      <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin-bottom: 20px; font-family: monospace; font-size: 13px; line-height: 1.8; color: var(--text);">
+        <div style="color: var(--accent); font-weight: bold; margin-bottom: 10px; font-size: 15px; text-align: center;">[ 비밀 암호 단서 ]</div>
+        <div style="font-size: 18px; color: var(--danger); font-weight: bold; text-align: center; margin-bottom: 12px; letter-spacing: 0.1em;">
+          ★ ⬛ ■ ⬠ ✿
+        </div>
+        <div style="font-size: 12px; color: var(--muted); line-height: 1.6; border-top: 1px dashed var(--line); padding-top: 10px; word-break: keep-all; text-align: center;">
+          ● = 은 / ★ = 범 / ■ = 은 / ✿ = 로 / ♥ = 복 / ▼ = 루 / ⬠ = 바 / ▲ = 한 / ⬛ = 인
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+        <input type="text" id="cardkeyPuzzleInput" placeholder="답 입력" onkeydown="if(event.key === 'Enter') submitCardkeyPuzzle()"
+               style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: rgba(5,9,16,0.8); color: var(--text); font-family: monospace; font-size: 16px; text-align: center;">
+        <button class="primary-btn" onclick="submitCardkeyPuzzle()" style="margin: 0; padding: 0 24px; min-height: 48px; border-radius: 12px;">확인</button>
+      </div>
+      
+      <div id="cardkeyPuzzleFeedback" style="color: var(--danger); font-size: 13px; min-height: 20px; margin-bottom: 20px; text-align: center; font-weight: 600;"></div>
+      
+      <div style="display: flex; justify-content: flex-end;">
+        <button class="object-btn" onclick="closeCardkeyPuzzleModal()" style="border-radius: 12px; font-size: 13px; padding: 8px 16px;">돌아가기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 주방 냉장고 일정표 모달 (fridgeScheduleModal) -->
+  <div id="fridgeScheduleModal" class="ending">
+    <div class="ending-card" style="border-color: var(--accent); max-width: 480px;">
+      <h2 style="color: var(--accent); display: flex; align-items: center; gap: 8px; font-size: 24px; margin-bottom: 16px;">
+        📋 냉장고 일정표 복구
+      </h2>
+      <p style="margin-bottom: 16px; line-height: 1.6; font-size: 14px; color: var(--text);">
+        다음 수식을 해독하여 지워진 일정표를 획득하시오.
+      </p>
+      
+      <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin-bottom: 20px; font-family: monospace; font-size: 13px; line-height: 1.7; color: var(--text);">
+        <div style="text-align: center; font-weight: bold; color: var(--accent); margin-bottom: 10px;">[ 지워진 일정표 ]</div>
+        <div style="font-size: 12px; color: var(--muted); margin-bottom: 12px; line-height: 1.5; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
+          08:00 아침 식사<br>
+          10:30 흔들다리 산책<br>
+          13:00 점심 준비<br>
+          15:00 객실 사진 촬영<br>
+          17:30 저녁 식사<br>
+          19:00 노래방<br>
+          20:00 다 같이 거실 모임<br>
+          21:00 ???<br>
+          22:00 취침 예정
+        </div>
+        <div style="color: var(--danger); font-weight: bold; text-align: center; margin-top: 10px; font-size: 14px;">
+          [ ■ + ● = 5 ]<br>
+          [ ● + ▲ = 7 ]<br>
+          [ ▲ + ■ = 6 ]<br>
+          <span style="color: var(--accent); font-size: 13px;">(■ + ● + ▲) 의 값은 무엇인가?</span>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+        <input type="text" id="fridgeScheduleInput" placeholder="값 입력 (숫자)" onkeydown="if(event.key === 'Enter') submitFridgeSchedule()"
+               style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: rgba(5,9,16,0.8); color: var(--text); font-family: monospace; font-size: 16px; text-align: center;">
+        <button class="primary-btn" onclick="submitFridgeSchedule()" style="margin: 0; padding: 0 24px; min-height: 48px; border-radius: 12px;">확인</button>
+      </div>
+      
+      <div id="fridgeScheduleFeedback" style="color: var(--danger); font-size: 13px; min-height: 20px; margin-bottom: 20px; text-align: center; font-weight: 600;"></div>
+      
+      <div style="display: flex; justify-content: flex-end;">
+        <button class="object-btn" onclick="closeFridgeScheduleModal()" style="border-radius: 12px; font-size: 13px; padding: 8px 16px;">돌아가기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 객실 문 번호 암호 모달 (roomDoorsPuzzleModal) -->
+  <div id="roomDoorsPuzzleModal" class="ending">
+    <div class="ending-card" style="border-color: var(--accent); max-width: 480px;">
+      <h2 style="color: var(--accent); display: flex; align-items: center; gap: 8px; font-size: 24px; margin-bottom: 16px;">
+        🔐 객실 문 번호 암호 해제
+      </h2>
+      <p style="margin-bottom: 16px; line-height: 1.6; font-size: 14px; color: var(--text);">
+        투숙객들의 방 번호를 알려면 답을 입력하시오.
+      </p>
+      
+      <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin-bottom: 20px; font-family: monospace; font-size: 15px; line-height: 1.8; color: var(--text);">
+        <div style="text-align: center; font-weight: bold; color: var(--accent); margin-bottom: 12px; font-size: 16px;">[ 문제 ]</div>
+        <div style="text-align: center; font-size: 20px; line-height: 2.0; font-weight: bold; color: var(--danger); letter-spacing: 0.05em;">
+          123 → 6<br>
+          456 → 120<br>
+          789 → ?
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+        <input type="text" id="roomDoorsPuzzleInput" placeholder="답 입력 (숫자)" onkeydown="if(event.key === 'Enter') submitRoomDoorsPuzzle()"
+               style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: rgba(5,9,16,0.8); color: var(--text); font-family: monospace; font-size: 16px; text-align: center;">
+        <button class="primary-btn" onclick="submitRoomDoorsPuzzle()" style="margin: 0; padding: 0 24px; min-height: 48px; border-radius: 12px;">확인</button>
+      </div>
+      
+      <div id="roomDoorsPuzzleFeedback" style="color: var(--danger); font-size: 13px; min-height: 20px; margin-bottom: 20px; text-align: center; font-weight: 600;"></div>
+      
+      <div style="display: flex; justify-content: flex-end;">
+        <button class="object-btn" onclick="closeRoomDoorsPuzzleModal()" style="border-radius: 12px; font-size: 13px; padding: 8px 16px;">돌아가기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 복도 CCTV 비밀번호 변경일 암호 모달 (cctvPuzzleModal) -->
+  <div id="cctvPuzzleModal" class="ending">
+    <div class="ending-card" style="border-color: var(--accent); max-width: 480px;">
+      <h2 style="color: var(--accent); display: flex; align-items: center; gap: 8px; font-size: 24px; margin-bottom: 16px;">
+        📹 복도 CCTV 관제 설정 해제
+      </h2>
+      <p style="margin-bottom: 16px; line-height: 1.6; font-size: 14px; color: var(--text);">
+        복도 CCTV는 다음과 같은 규칙으로 비밀번호 변경 날짜를 정한다. 다음 변경일은 언제인가?
+      </p>
+      
+      <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin-bottom: 20px; font-family: monospace; font-size: 15px; line-height: 1.8; color: var(--text);">
+        <div style="text-align: center; font-weight: bold; color: var(--accent); margin-bottom: 12px; font-size: 16px;">[ 비밀번호 변경 주기 규칙 ]</div>
+        <div style="text-align: center; font-size: 20px; line-height: 2.0; font-weight: bold; color: var(--danger); letter-spacing: 0.1em;">
+          2일 ➔ 3일 ➔ 5일 ➔ 8일 ➔ 13일 ➔ <span style="border-bottom: 2px solid var(--accent); padding: 0 4px;">?</span> 일
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+        <input type="text" id="cctvPuzzleInput" placeholder="답 입력 (숫자)" onkeydown="if(event.key === 'Enter') submitCctvPuzzle()"
+               style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: rgba(5,9,16,0.8); color: var(--text); font-family: monospace; font-size: 16px; text-align: center;">
+        <button class="primary-btn" onclick="submitCctvPuzzle()" style="margin: 0; padding: 0 24px; min-height: 48px; border-radius: 12px;">확인</button>
+      </div>
+      
+      <div id="cctvPuzzleFeedback" style="color: var(--danger); font-size: 13px; min-height: 20px; margin-bottom: 20px; text-align: center; font-weight: 600;"></div>
+      
+      <div style="display: flex; justify-content: flex-end;">
+        <button class="object-btn" onclick="closeCctvPuzzleModal()" style="border-radius: 12px; font-size: 13px; padding: 8px 16px;">돌아가기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 노래방 기계 주파수 패턴 암호 모달 (karaokeMachinePuzzleModal) -->
+  <div id="karaokeMachinePuzzleModal" class="ending">
+    <div class="ending-card" style="border-color: var(--accent); max-width: 480px;">
+      <h2 style="color: var(--accent); display: flex; align-items: center; gap: 8px; font-size: 24px; margin-bottom: 16px;">
+        📟 노래방 기계 주파수 분석
+      </h2>
+      <p style="margin-bottom: 16px; line-height: 1.6; font-size: 14px; color: var(--text);">
+        노래방 기계의 화면을 켜자, 주파수 대역폭 패턴이 나타납니다. 문제를 풀고 사건 당시 주파수 패턴을 확인하세요.
+      </p>
+      
+      <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin-bottom: 20px; font-family: monospace; font-size: 15px; line-height: 1.8; color: var(--text);">
+        <div style="text-align: center; font-weight: bold; color: var(--accent); margin-bottom: 12px; font-size: 16px;">[ 문제 ]</div>
+        <div style="text-align: center; font-size: 14px; margin-bottom: 8px; color: var(--muted);">물음표에 들어갈 숫자를 쓰시오.</div>
+        <div style="text-align: center; font-size: 20px; line-height: 2.0; font-weight: bold; color: var(--danger); letter-spacing: 0.05em;">
+          2 Hz ➔ 4 Hz ➔ 16 Hz ➔ <span style="border-bottom: 2px solid var(--accent); padding: 0 4px;">?</span> Hz
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+        <input type="text" id="karaokeMachinePuzzleInput" placeholder="답 입력 (숫자)" onkeydown="if(event.key === 'Enter') submitKaraokeMachinePuzzle()"
+               style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: rgba(5,9,16,0.8); color: var(--text); font-family: monospace; font-size: 16px; text-align: center;">
+        <button class="primary-btn" onclick="submitKaraokeMachinePuzzle()" style="margin: 0; padding: 0 24px; min-height: 48px; border-radius: 12px;">확인</button>
+      </div>
+      
+      <div id="karaokeMachinePuzzleFeedback" style="color: var(--danger); font-size: 13px; min-height: 20px; margin-bottom: 20px; text-align: center; font-weight: 600;"></div>
+      
+      <div style="display: flex; justify-content: flex-end;">
+        <button class="object-btn" onclick="closeKaraokeMachinePuzzleModal()" style="border-radius: 12px; font-size: 13px; padding: 8px 16px;">돌아가기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 관리실 CCTV 콘솔 암호 모달 (cctvConsolePuzzleModal) -->
+  <div id="cctvConsolePuzzleModal" class="ending">
+    <div class="ending-card" style="border-color: var(--accent); max-width: 480px;">
+      <h2 style="color: var(--accent); display: flex; align-items: center; gap: 8px; font-size: 24px; margin-bottom: 16px;">
+        🖥️ CCTV 콘솔 잠금 해제
+      </h2>
+      <p style="margin-bottom: 16px; line-height: 1.6; font-size: 14px; color: var(--text);">
+        화면에 수식이 깜빡이고 있다. 규칙을 해독하여 물음표에 들어갈 숫자를 쓰시오.
+      </p>
+      
+      <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin-bottom: 20px; font-family: monospace; font-size: 15px; line-height: 1.8; color: var(--text);">
+        <div style="text-align: center; font-weight: bold; color: var(--accent); margin-bottom: 12px; font-size: 16px;">[ 문제 ]</div>
+        <div style="text-align: center; font-size: 16px; line-height: 2.0; font-weight: bold; color: var(--danger); letter-spacing: 0.05em; word-break: keep-all;">
+          [ ㅈ + ㅇ + ㅅ = 6 ]<br>
+          [ ㅈ + ㄱ + ㅎ = 8 ]<br>
+          [ ㅇ + ㅅ + ㅎ = 6 ]<br>
+          [ ㅊ + ㅎ + ㄱ = ? ]
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+        <input type="text" id="cctvConsolePuzzleInput" placeholder="답 입력 (숫자)" onkeydown="if(event.key === 'Enter') submitCctvConsolePuzzle()"
+               style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: rgba(5,9,16,0.8); color: var(--text); font-family: monospace; font-size: 16px; text-align: center;">
+        <button class="primary-btn" onclick="submitCctvConsolePuzzle()" style="margin: 0; padding: 0 24px; min-height: 48px; border-radius: 12px;">확인</button>
+      </div>
+      
+      <div id="cctvConsolePuzzleFeedback" style="color: var(--danger); font-size: 13px; min-height: 20px; margin-bottom: 20px; text-align: center; font-weight: 600;"></div>
+      
+      <div style="display: flex; justify-content: flex-end;">
+        <button class="object-btn" onclick="closeCctvConsolePuzzleModal()" style="border-radius: 12px; font-size: 13px; padding: 8px 16px;">돌아가기</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const rooms = {
+      living: {
+        title: "거실",
+        desc: "거실 중앙 바닥에는 피해자 은서가 엎드린 채 차갑게 식어 있었다. 주변에는 깨진 유리컵 조각들과 묘한 얼룩이 흩어져 있었다.",
+        unlocks: "kitchen",
+        unlockText: "피해자는 평소 각 식기와 컵의 각도까지 직접 통제할 정도로 강박적인 완벽주의자였습니다.\n거실에 깨진 잔은 어디서 가져온 것일까요?\n주방을 조사하여 컵의 원래 위치를 파악하세요.\n주방을 조사할 수 있게 되었습니다.",
+        condition: () => countEvidence(["cardkey_zero", "broken_glass", "alcohol_stain_living", "drag_mark"]) === 4,
+        decos: [
+          { label: "소파 세트", x: "25%", y: "65%", w: "220px", h: "75px" },
+          { label: "목재 협탁", x: "55%", y: "60%", w: "130px", h: "70px" },
+          { label: "대형 TV 테이블", x: "18%", y: "22%", w: "120px", h: "130px" }
+        ],
+        objects: [
+          { id: "body", name: "정은서의 사체", text: "사인 불명. 테이블 밑에 쓰러져 있다. 손안에는 '0'이 손톱으로 조각된 카드키가 꽉 쥐어져 있다.", evidence: "cardkey_zero", x: "46%", y: "66%", icon: "⚠️", labelDir: "bottom" },
+          { id: "broken_glass_obj", name: "깨진 유리컵", text: "테이블 아래에 깨진 유리 조각이 흩어져 있다. 몸싸움이 있었던 것 같다.", evidence: "broken_glass", x: "61%", y: "63%", icon: "🔍", labelDir: "right" },
+          { id: "alcohol_stain", name: "알코올 얼룩", text: "테이블 옆 바닥에 알코올 냄새가 나는 얼룩이 남아 있다. 누군가의 옷에 튀었을 수도 있다.", evidence: "alcohol_stain_living", x: "53%", y: "73%", icon: "💧", labelDir: "bottom" },
+          { id: "carpet", name: "카펫", text: "카펫을 들춰보니 미세한 끌림 자국이 보인다. 시신의 위치가 옮겨졌을 가능성이 있다.", evidence: "drag_mark", x: "42%", y: "54%", icon: "🧹", labelDir: "top" },
+          { id: "window", name: "열린 창문", text: "창문은 살짝 열려 있지만, 절벽 쪽이라 사람이 드나들 수 있는 도주로는 없다. 외부 침입 가능성은 낮다.", evidence: null, x: "82%", y: "25%", icon: "🪟", labelDir: "bottom" },
+          { id: "suspects", name: "세 명의 투숙객", text: "서희는 냉담하고, 가현은 불안해 보이며, 하경은 지나치게 침착하다. 각자의 알리바이를 확인해야 한다.", evidence: null, x: "10%", y: "30%", icon: "👥", labelDir: "bottom" }
+        ]
+      },
+      kitchen: {
+        title: "주방",
+        desc: "주방은 이상할 만큼 정돈되어 있었다. 냉장고에는 오늘 하루의 일정표가 붙어 있었고, 모든 식기와 컵은 정확한 위치에 맞춰 정리되어 있었다.",
+        unlocks: "hallway",
+        unlockText: "객실 복도를 조사할 수 있게 되었다.",
+        condition: () => countEvidence(["schedule_hakyeong", "glass_set", "schedule_draft"]) === 3,
+        decos: [
+          { label: "패밀리 냉장고", x: "78%", y: "20%", w: "85px", h: "260px" },
+          { label: "조리용 싱크대", x: "44%", y: "52%", w: "170px", h: "90px" },
+          { label: "목재 식기 수납선반", x: "12%", y: "15%", w: "210px", h: "45px" }
+        ],
+        objects: [
+          { id: "fridge_schedule", name: "냉장고 일정표", text: "냉장고 옆면에 꼼꼼하게 손글씨로 쓰인 종이가 붙어 있다.\n\n[오늘의 일정]\n08:00 아침 식사\n10:30 흔들다리 산책\n13:00 점심 준비\n15:00 객실 사진 촬영\n17:30 저녁 식사\n19:00 노래방\n20:00 다 같이 거실 모임\n21:00 ???\n22:00 취침 예정", evidence: "schedule_hakyeong", x: "82%", y: "35%", icon: "📋", labelDir: "left" },
+          { id: "glass_cabinet", name: "유리컵 선반", text: "선반에 놓인 유리컵은 거실에서 깨진 컵과 같은 세트다. 누군가 주방에서 컵을 가져간 것이다.", evidence: "glass_set", x: "21%", y: "22%", icon: "🍷", labelDir: "bottom" },
+          { id: "sink", name: "싱크대", text: "물기는 남아 있지만 급하게 씻은 흔적은 보이지 않는다. 범인이 컵을 치우려 하지는 않은 것 같다.", evidence: null, x: "53%", y: "58%", icon: "🚰", labelDir: "top" },
+          { id: "trash_bin", name: "쓰레기통", text: "구겨진 일정표 초안들이 들어 있다. 은서가 이번 여행을 집요하게 통제하려 했다는 걸 알 수 있다.", evidence: "schedule_draft", x: "70%", y: "75%", icon: "🗑️", labelDir: "bottom" },
+          { id: "tableware", name: "정리된 식기", text: "식기들이 각도까지 맞춰 놓여 있다. 은서의 완벽주의가 느껴진다.", evidence: null, x: "15%", y: "70%", icon: "🍽️", labelDir: "top" }
+        ]
+      },
+      hallway: {
+        title: "객실 복도",
+        desc: "복도는 길고 어두웠다. 0호실부터 3호실까지 이어진 문들이 일정한 간격으로 늘어서 있었다. 천장 모서리에는 CCTV가 있었지만, 기둥 하나가 시야를 가리고 있었다.",
+        unlocks: "karaoke",
+        unlockText: "지하 노래방을 조사할 수 있게 되었다.",
+        condition: () => countEvidence(["card_log_gap", "cctv_blind_spot", "seohee_outing_trace", "hakyeong_room_alcohol"]) === 4,
+        decos: [
+          { label: "0호실", x: "10%", y: "25%", w: "65px", h: "180px" },
+          { label: "1호실", x: "30%", y: "25%", w: "65px", h: "180px" },
+          { label: "2호실", x: "50%", y: "25%", w: "65px", h: "180px" },
+          { label: "3호실", x: "70%", y: "25%", w: "65px", h: "180px" }
+        ],
+        objects: [
+          { id: "room_doors", name: "객실 문 번호", text: "0호실은 최하경, 1호실은 이서희, 2호실은 전가현, 3호실은 정은서의 방이다.", evidence: "room_doors_solved", x: "14%", y: "15%", icon: "🚪", labelDir: "left" },
+          { id: "card_reader", name: "카드키 리더기", text: "하경의 카드키 기록은 20:15 퇴장, 21:15 귀환만 남아 있다.", evidence: "card_log_gap", x: "22%", y: "52%", icon: "📟", labelDir: "bottom" },
+          { id: "cctv_camera", name: "복도 CCTV", text: "하경 방 앞 구간은 기둥 때문에 정확히 찍히지 않는다. 누군가 이 사각지대를 알고 있었다면 움직임을 숨길 수 있다.", evidence: "cctv_blind_spot", x: "88%", y: "10%", icon: "📹", labelDir: "left" },
+          { id: "seohee_door", name: "1호실", text: "문 아래로 젖은 흙이 조금 묻어 있다. 서희가 방 밖에 나갔던 것 같다.", evidence: "seohee_outing_trace", x: "34%", y: "45%", icon: "🔍", labelDir: "bottom" },
+          { id: "gahyun_door", name: "2호실", text: "문 안쪽에서 흐느끼는 소리가 들린다. 가현은 아직 극도로 불안한 상태다.", evidence: null, x: "54%", y: "45%", icon: "👤", labelDir: "bottom" },
+          { id: "hakyeong_door", name: "0호실", text: "문 손잡이 근처에서 희미한 알코올 냄새가 난다.", evidence: "hakyeong_room_alcohol", x: "10%", y: "45%", icon: "💧", labelDir: "top" },
+          { id: "eunseo_door", name: "3호실", text: "문손잡이와 디지털 도어락 주변이 지나칠 정도로 깨끗하게 닦여 있다. 누군가 지문을 고의로 지운 흔적이 분명하다.", evidence: "eunseo_room_clue", x: "74%", y: "45%", icon: "🚪", labelDir: "top" }
+        ]
+      },
+      karaoke: {
+        title: "지하 노래방",
+        desc: "지하 노래방은 아직 전원이 켜져 있었다. 스피커에서는 끊긴 듯한 반주음이 낮게 흘러나오고, 마이크에서는 묘하게 익숙한 알코올 냄새가 났다.",
+        unlocks: "office",
+        unlockText: "노래방 알리바이는 무너졌다. 이제 남은 것은 기록이다.\nCCTV와 카드키 로그를 모두 대조해야 한다.\n관리실로 돌아갈 수 있게 되었다.",
+        condition: () => countEvidence(["alcohol_mic", "karaoke_repeat", "edited_recording", "repeat_button_trace", "alcohol_wipe_pack"]) === 5,
+        decos: [
+          { label: "노래방 대형 모니터", x: "32%", y: "12%", w: "240px", h: "120px" },
+          { label: "기기 캐비닛", x: "12%", y: "40%", w: "80px", h: "160px" },
+          { label: "디럭스 쇼파", x: "56%", y: "60%", w: "240px", h: "80px" }
+        ],
+        objects: [
+          { id: "microphone", name: "마이크", text: "마이크에서 소독용 알코올 성분이 검출된다. 거실의 알코올 얼룩과 같은 냄새다.", evidence: "alcohol_mic", x: "36%", y: "65%", icon: "🎤", labelDir: "left" },
+          { id: "karaoke_machine", name: "노래방 기계", text: "20:40부터 21:20까지 같은 곡이 8회 반복 재생되었다. 하지만 버튼 입력은 20:40에 한 번뿐이다.", evidence: "karaoke_repeat", x: "16%", y: "45%", icon: "📟", labelDir: "right" },
+          { id: "recording_file", name: "녹음 파일", text: "파일에는 자연스러운 호흡도, 음정 흔들림도, 침 삼키는 소리도 없다. 배경 소음까지 같은 패턴으로 반복된다.", evidence: "edited_recording", x: "44%", y: "25%", icon: "💾", labelDir: "top" },
+          { id: "remote_control", name: "기기 리모컨", text: "반복 재생 버튼에만 손때가 진하게 남아 있다.", evidence: "repeat_button_trace", x: "58%", y: "65%", icon: "🎮", labelDir: "right" },
+          { id: "trash_karaoke", name: "노래방 쓰레기통", text: "알코올 솜 포장지가 들어 있다. 하경은 향에 예민하다면서 왜 알코올을 썼을까?", evidence: "alcohol_wipe_pack", x: "85%", y: "75%", icon: "🗑️", labelDir: "top" }
+        ]
+      },
+      office: {
+        title: "관리실",
+        desc: "관리실 모니터에는 펜션 곳곳의 기록이 남아 있었다. 끊긴 화면, 비어 있는 카드키 로그, 정전 경고음. 사람은 거짓말을 하지만 기록은 흔적을 남긴다.",
+        unlocks: null,
+        unlockText: "",
+        condition: () => countEvidence(["keyring_cctv", "restored_log", "guest_cards", "past_accident_file"]) === 4,
+        decos: [
+          { label: "멀티 콘솔 데스크", x: "18%", y: "55%", w: "450px", h: "90px" },
+          { label: "CCTV 모니터 관제벽", x: "18%", y: "15%", w: "450px", h: "140px" }
+        ],
+        objects: [
+          { id: "cctv_console", name: "CCTV 콘솔", text: "흔들다리 화면을 되감자 누군가 난간 쪽으로 작은 물건을 던지는 실루엣이 보인다.", evidence: "keyring_cctv", x: "28%", y: "34%", icon: "🖥️", labelDir: "left" },
+          { id: "log_restore", name: "카드키 로그 복구 프로그램", text: "누락된 기록 일부가 복구된다. 20:40 이후 하경의 동선에 비정상적인 공백이 확인된다.", evidence: "restored_log", x: "48%", y: "34%", icon: "💻", labelDir: "right" },
+          { id: "guest_cards", name: "투숙객 체크인 카드", text: "하경은 0호실, 서희는 1호실, 가현은 2호실, 은서는 3호실에 배정되어 있었다.", evidence: "guest_cards", x: "24%", y: "62%", icon: "📇", labelDir: "bottom" },
+          { id: "incident_file", name: "3년 전 사고 기록 파일", text: "3년 전 흔들다리 옆 절벽에서 추락 사고가 있었다. 공식 기록은 실족 사고. 당시 다리 위에는 은서와 하경이 있었다.", evidence: "past_accident_file", x: "74%", y: "55%", icon: "📁", labelDir: "right" },
+          { id: "phone", name: "먹통이 된 전화기", text: "외부 전화는 연결되지 않는다. 흔들다리가 복구되기 전까지 이곳에서 진실을 밝혀야 한다.", evidence: null, x: "54%", y: "62%", icon: "📞", labelDir: "top" }
+        ]
+      }
+    };
+
+    const evidenceInfo = {
+      cardkey_zero: ["의문의 표시가 적힌 카드키", "카드키 앞면에는 '이서희'라는 이름이 적혀 있다. 하지만 뒷면에는 손톱으로 긁은 듯한 표시가 남아 있다. 동그라미? 알파벳 O? 숫자 0?"],
+      broken_glass: ["깨진 유리컵", "거실에서 몸싸움 중 깨진 것으로 보인다."],
+      alcohol_stain_living: ["거실의 알코올 얼룩", "누군가의 소매에 튀었을 가능성이 있다."],
+      drag_mark: ["카펫 아래 끌림 자국", "시신 위치가 옮겨졌을 가능성을 보여준다."],
+      schedule_hakyeong: ["냉장고 일정표", "오늘 은서의 상세 일정이 적혀 있다. 19:00에 노래방과 21:00에 자유시간 일정이 포함되어 있다."],
+      glass_set: ["동일한 유리컵 세트", "거실 컵은 주방에서 가져간 것이다."],
+      schedule_draft: ["구겨진 일정표 초안", "은서가 여행을 집요하게 통제했다."],
+      card_log_gap: ["카드키 로그 공백", "20:40~21:15 사이 하경의 기록이 비어 있다."],
+      cctv_blind_spot: ["복도 CCTV 사각지대", "하경 방 앞 구간이 기둥에 가려져 있다."],
+      yellow_sleeve_cctv: ["노란 소매 CCTV 프레임", "번개 순간 노란 소매와 얼룩이 포착됐다."],
+      seohee_outing_trace: ["서희의 외출 흔적", "서희가 감시를 피해 나간 정황이다."],
+      hakyeong_room_alcohol: ["0호실 손잡이 알코올 냄새", "하경의 방 근처에서도 알코올 냄새가 난다."],
+      alcohol_mic: ["마이크의 알코올 성분", "거실 알코올과 같은 냄새다."],
+      karaoke_repeat: ["동일 곡 8회 반복 재생", "노래방 알리바이가 조작됐을 가능성을 보여준다."],
+      edited_recording: ["편집된 녹음 파일", "실제 사람이 부른 노래가 아니라 반복 재생 파일이다."],
+      repeat_button_trace: ["반복 재생 버튼 흔적", "반복 재생 기능이 사용됐다."],
+      alcohol_wipe_pack: ["알코올 솜 포장지", "향에 예민한 하경의 진술과 모순된다."],
+      keyring_cctv: ["키링 투척 CCTV", "누군가 가현의 키링을 흔들다리에 던졌다."],
+      restored_log: ["복구된 카드키 이동 기록", "하경의 동선에 비정상적 공백이 있다."],
+      blackout_record: ["정전 및 번개 기록", "CCTV 프레임이 저장된 이유를 설명한다."],
+      guest_cards: ["투숙객 체크인 카드", "객실 배정을 재확인할 수 있다."],
+      past_accident_file: ["3년 전 사고 기록", "은서와 하경 사이의 동기를 보여준다."],
+      gahyun_fear: ["가현의 고소공포증 진술", "가현은 흔들다리에 접근하기 어렵다."],
+      seohee_motive_false: ["서희의 감시 회피 진술", "CCTV 사각지대 검색은 살인 준비가 아니었다."],
+      hakyeong_contradiction: ["하경의 알코올 진술 모순", "향에 예민하다면서 마이크를 알코올로 닦았다고 했다."],
+      room_doors_solved: ["객실 문 번호 해독", "0호실은 최하경, 1호실은 이서희, 2호실은 전가현, 3호실은 정은서의 방이다."],
+      eunseo_room_clue: ["3호실 정은서의 방 흔적", "은서의 방 문손잡이와 디지털 도어락 주변이 고의로 지문 하나 없이 깨끗하게 청소되어 있다."]
+    };
+
+    const talks = {
+      seohee: {
+        name: "이서희",
+        intro: "서희는 팔짱을 낀 채 창밖을 바라보고 있다.\n“경찰은 언제 와요? 여기서 계속 기다리라는 건 아니죠?”",
+        choices: [
+          { q: "카드키가 왜 은서 손에 있었는지 묻는다", a: "“내 카드키요? 잃어버린 줄도 몰랐어요.”", ev: null },
+          { q: "CCTV 사각지대를 왜 검색했는지 묻는다", a: "“은서가 우리를 계속 감시했어요. 잠깐이라도 벗어나고 싶었을 뿐이에요.”", ev: "seohee_motive_false" },
+          { q: "은서와 사이가 나빴는지 묻는다", a: "“좋았다고는 못 하죠. 하지만 죽일 정도는 아니었어요.”", ev: null }
+        ]
+      },
+      gahyun: {
+        name: "전가현",
+        intro: "가현은 문가에 주저앉아 손을 떨고 있다.\n“저 아니에요. 저는 방에 있었어요. 다리 근처에도 안 갔어요.”",
+        choices: [
+          { q: "키티 키링이 왜 흔들다리에 있었는지 묻는다", a: "“그게 왜 거기 있어요? 분명 가방에 달려 있었는데...”", ev: null },
+          { q: "흔들다리에 갈 수 있었는지 묻는다", a: "“못 가요. 저는 그 다리 보기만 해도 숨이 막혀요.”", ev: "gahyun_fear" },
+          { q: "은서와 다툰 이유를 묻는다", a: "“은서가 억지로 다리를 건너자고 했어요. 저는 못 한다고 했고요.”", ev: null }
+        ]
+      },
+      hakyeong: {
+        name: "최하경",
+        intro: "하경은 이상할 만큼 침착했다.\n“저는 계속 노래방에 있었어요. 소리가 들렸잖아요?”",
+        choices: [
+          { q: "21시에 어디 있었는지 묻는다", a: "“노래방이요. 계속 노래하고 있었어요.”", ev: null },
+          { q: "마이크의 알코올을 묻는다", a: "“마이크 쓰기 전에 닦았어요. 찝찝해서요.”\n향에 예민하다던 하경의 말과 어딘가 맞지 않는다.", ev: "hakyeong_contradiction" },
+          { q: "노란 소매 얼룩을 묻는다", a: "“그냥 물이 튄 거예요. 비도 많이 왔잖아요.”", ev: null },
+          { q: "3년 전 사고를 묻는다", a: "“그 얘기는 왜 지금 하세요?”\n처음으로 하경의 표정이 무너졌다.", ev: null }
+        ]
+      }
+    };
+
+    const coreEvidence = [
+      "cardkey_zero",
+      "schedule_hakyeong",
+      "karaoke_repeat",
+      "edited_recording",
+      "alcohol_mic",
+      "keyring_cctv",
+      "restored_log",
+      "past_accident_file"
+    ];
+
+    let state = {
+      currentRoom: "living",
+      unlockedRooms: ["living"],
+      evidence: [],
+      clicked: [],
+      finalUnlocked: false,
+      cinDialogueRead: {
+        seohee: false,
+        gahyun: false,
+        hakyeong: false
+      }
+    };
+
+    function hasEvidence(id) {
+      return state.evidence.includes(id);
+    }
+
+    function countEvidence(ids) {
+      return ids.filter(id => hasEvidence(id)).length;
+    }
+
+    function addEvidence(id) {
+      if (!id) return false;
+      if (!state.evidence.includes(id)) {
+        state.evidence.push(id);
+        return true;
+      }
+      return false;
+    }
+
+    function unlockRoom(id, message) {
+      if (!id || state.unlockedRooms.includes(id)) return;
+      state.unlockedRooms.push(id);
+      showNotice(message);
+    }
+
+    function showNotice(message) {
+      const box = document.getElementById("noticeBox");
+      box.textContent = message;
+      box.classList.add("show");
+    }
+
+    function hideNotice() {
+      const box = document.getElementById("noticeBox");
+      box.textContent = "";
+      box.classList.remove("show");
+    }
+
+    function render() {
+      const room = rooms[state.currentRoom];
+      document.getElementById("roomTitle").textContent = room.title;
+      document.getElementById("roomDesc").textContent = room.desc;
+      renderRooms();
+      renderObjects();
+      renderEvidence();
+      renderProgress();
+      updateFinalState();
+    }
+
+    function renderRooms() {
+      const nav = document.getElementById("roomNav");
+      nav.innerHTML = "";
+
+      const roomImages = {};
+
+      Object.entries(rooms).forEach(([id, room]) => {
+        const btn = document.createElement("button");
+        btn.className = "room-btn-card";
+
+        if (state.currentRoom === id) {
+          btn.classList.add("active");
+        }
+
+        // Add background image with no-referrer
+        if (roomImages[id]) {
+          const img = document.createElement("img");
+          img.src = roomImages[id];
+          img.alt = room.title;
+          img.referrerPolicy = "no-referrer";
+          img.className = "room-card-img";
+          img.onerror = () => {
+            img.src = `https://picsum.photos/seed/pension_${id}/400/250`;
+          };
+          btn.appendChild(img);
+        }
+
+        // Add dark gradient overlay
+        const overlay = document.createElement("div");
+        overlay.className = "room-card-overlay";
+        btn.appendChild(overlay);
+
+        // Add text container
+        const contentDiv = document.createElement("div");
+        contentDiv.className = "room-card-text";
+
+        const titleSpan = document.createElement("span");
+        titleSpan.className = "room-card-title";
+        
+        let statusText = "🔍 조사 가능";
+
+        if (!state.unlockedRooms.includes(id)) {
+          btn.classList.add("locked");
+          titleSpan.innerHTML = `🔒 ${room.title}`;
+          statusText = "잠김 (단서 부족)";
+          btn.onclick = () => {
+            document.getElementById("resultBox").textContent = "아직 이 구역을 조사할 수 없다. 필요한 단서를 더 찾아야 한다.";
+          };
+        } else {
+          titleSpan.innerHTML = state.currentRoom === id ? `📍 ${room.title}` : `🚪 ${room.title}`;
+          if (state.currentRoom === id) {
+            statusText = "상세 조사 중...";
+          }
+          btn.onclick = () => {
+            state.currentRoom = id;
+            hideNotice();
+            document.getElementById("talkArea").classList.remove("show");
+            document.getElementById("resultBox").textContent = rooms[id].desc;
+            render();
+          };
+        }
+
+        const statusSpan = document.createElement("span");
+        statusSpan.className = "room-card-status";
+        statusSpan.textContent = statusText;
+
+        contentDiv.appendChild(titleSpan);
+        contentDiv.appendChild(statusSpan);
+        btn.appendChild(contentDiv);
+
+        nav.appendChild(btn);
+      });
+    }
+
+    function renderObjects() {
+      const scene = document.getElementById("roomScene");
+      if (!scene) return;
+      
+      scene.innerHTML = "";
+
+      // 1. Dynamic scenic picture background
+      const roomFullImages = {};
+
+      if (roomFullImages[state.currentRoom]) {
+        const bgImg = document.createElement("img");
+        bgImg.className = "scene-bg";
+        bgImg.src = roomFullImages[state.currentRoom];
+        bgImg.referrerPolicy = "no-referrer";
+        bgImg.alt = rooms[state.currentRoom].title + " 전경";
+        bgImg.onerror = () => {
+          bgImg.src = `https://picsum.photos/seed/pension_${state.currentRoom}/800/400`;
+        };
+        scene.appendChild(bgImg);
+      }
+
+      // 2. Rain overlay
+      const rOverlay = document.createElement("div");
+      rOverlay.className = "rain-overlay";
+      scene.appendChild(rOverlay);
+
+      const room = rooms[state.currentRoom];
+      
+      // 방 테마 배경 클래스 동적 부여
+      scene.className = "scene-container scene-" + state.currentRoom;
+
+      // 1. 방 전경을 나타내는 가상 가구/실루엣 도식(데코) 생성
+      if (room.decos) {
+        room.decos.forEach(deco => {
+          const div = document.createElement("div");
+          div.className = "deco-item";
+          div.style.left = deco.x;
+          div.style.top = deco.y;
+          div.style.width = deco.w;
+          div.style.height = deco.h;
+          div.textContent = deco.label;
+          scene.appendChild(div);
+        });
+      }
+
+      // 2. 클릭 가능한 방탈출 핫스팟 핀 생성
+      room.objects.forEach(obj => {
+        const hotspot = document.createElement("div");
+        hotspot.className = "hotspot";
+        
+        // 이미 단서를 발견했으면 녹색 테두리로 처리
+        if (obj.evidence && hasEvidence(obj.evidence)) {
+          hotspot.classList.add("found");
+        }
+        
+        hotspot.style.left = obj.x || "50%";
+        hotspot.style.top = obj.y || "50%";
+
+        const trigger = document.createElement("button");
+        trigger.className = "hotspot-trigger";
+        trigger.innerHTML = `<span class="hotspot-icon">${obj.icon || "🔍"}</span>`;
+        trigger.onclick = () => inspectObject(obj);
+
+        const label = document.createElement("span");
+        const dirClass = "label-" + (obj.labelDir || "bottom");
+        label.className = `hotspot-label ${dirClass}`;
+        const isFound = obj.evidence && hasEvidence(obj.evidence);
+        label.innerHTML = (isFound ? "✓ " : "") + obj.name;
+
+        hotspot.appendChild(trigger);
+        hotspot.appendChild(label);
+        scene.appendChild(hotspot);
+      });
+    }
+
+    function inspectObject(obj) {
+      hideNotice();
+
+      // 객실 복도 순서 제약 조건
+      const subDoors = ["hakyeong_door", "seohee_door", "gahyun_door", "eunseo_door"];
+      if (subDoors.includes(obj.id)) {
+        if (!hasEvidence("room_doors_solved")) {
+          document.getElementById("resultBox").textContent = "아직 어느 객실이 누구의 방인지 구분할 수 없습니다. '객실 문 번호' 암호를 가장 먼저 해독하여 각 객실의 주인을 밝혀내야 합니다.";
+          showNotice("가장 먼저 '객실 문 번호'를 해독해야 합니다.");
+          return;
+        }
+      }
+
+      // 거실 이서희 카드키 (정은서의 사체)
+      if (obj.id === "body") {
+        if (!hasEvidence("cardkey_zero")) {
+          openCardkeyPuzzleModal();
+          return;
+        } else {
+          let message = "카드키 앞면에는 '이서희'라는 이름이 적혀 있다. 하지만 뒷면에는 손톱으로 긁은 듯한 표시가 남아 있다. 동그라미? 알파벳 O? 숫자 0?";
+          document.getElementById("resultBox").textContent = message;
+          render();
+          return;
+        }
+      }
+
+      // 객실 복도 - 객실 문 번호
+      if (obj.id === "room_doors") {
+        if (!hasEvidence("room_doors_solved")) {
+          openRoomDoorsPuzzleModal();
+          return;
+        } else {
+          let message = "0호실은 최하경, 1호실은 이서희, 2호실은 전가현, 3호실은 정은서의 방이다.";
+          document.getElementById("resultBox").textContent = message;
+          render();
+          return;
+        }
+      }
+
+      // 객실 복도 - 복도 CCTV
+      if (obj.id === "cctv_camera") {
+        if (!hasEvidence("cctv_blind_spot")) {
+          openCctvPuzzleModal();
+          return;
+        } else {
+          let message = "“0호실 쪽 구간은 기둥 때문에 정확히 찍히지 않는다. 누군가 이 사각지대를 알고 있었다면 움직임을 숨길 수 있다.”";
+          document.getElementById("resultBox").textContent = message;
+          render();
+          return;
+        }
+      }
+
+      // 주방 냉장고 일정표
+      if (obj.id === "fridge_schedule") {
+        if (!hasEvidence("schedule_hakyeong")) {
+          openFridgeScheduleModal();
+          return;
+        } else {
+          let message = "[오늘의 일정]\n08:00 아침 식사\n10:30 흔들다리 산책\n13:00 점심 준비\n15:00 객실 사진 촬영\n17:30 저녁 식사\n19:00 노래방\n20:00 다 같이 거실 모임\n21:00 자유시간 \n22:00 취침 예정";
+          document.getElementById("resultBox").textContent = message;
+          render();
+          return;
+        }
+      }
+
+      // 녹음 파일 오브젝트이고, 아직 증거가 확보되지 않았다면(잠겨있다면) 암호 입력 창 표시
+      if (obj.id === "recording_file") {
+        if (!hasEvidence("edited_recording")) {
+          openCipherModal();
+          return;
+        } else {
+          let message = "잠금이 해제되었습니다!\n비밀번호가 일치하여 녹음 파일 장치에 성공적으로 접속했습니다.\n\n" + 
+                        "파일에는 자연스러운 호흡도, 음정 흔들림도, 침 삼키는 소리도 없다. 배경 소음까지 같은 패턴으로 반복된다.";
+          document.getElementById("resultBox").textContent = message;
+          render();
+          return;
+        }
+      }
+
+      // 지하 노래방 - 노래방 기계 주파수 패턴 분석
+      if (obj.id === "karaoke_machine") {
+        if (!hasEvidence("karaoke_repeat")) {
+          openKaraokeMachinePuzzleModal();
+          return;
+        } else {
+          let message = "20:40부터 21:20까지 같은 곡이 8회 반복 재생되었다. 하지만 버튼 입력은 20:40에 한 번뿐이다.";
+          document.getElementById("resultBox").textContent = message;
+          render();
+          return;
+        }
+      }
+
+      // 3년 전 사고 기록 파일
+      if (obj.id === "incident_file" || obj.id === "past_accident_file") {
+        if (!hasEvidence("past_accident_file")) {
+          openPastAccidentModal();
+          return;
+        } else {
+          let message = "[흔들다리 추락 사고 보고서]\n" +
+                        "피해자: 박민우 (당시 22세)\n" +
+                        "발생 시각: 2023년 8월 17일 21:13\n" +
+                        "사고 위치: 흔들다리 북쪽 절벽\n" +
+                        "현장 기록: 폭우로 시야 확보 어려움. CCTV 일부 손상.  피해자의 신발 한 짝만 발견됨. 현장에 있던 목격자는 정은서, 최하경 두 명뿐. 추가 메모: 최하경은 조사 내내 말을 거의 하지 않았음. 정은서는 반복적으로 \"내 잘못이 아니다\"라고 진술함.";
+          document.getElementById("resultBox").textContent = message;
+          render();
+          return;
+        }
+      }
+
+      // 카드키 로그 복구 프로그램
+      if (obj.id === "log_restore") {
+        if (!hasEvidence("restored_log")) {
+          openLogRestoreModal();
+          return;
+        } else {
+          let message = "복구 완료.\n\n" +
+                        "20:18 - 관리실 접근\n" +
+                        "20:43 - 노래방 출입 감지\n\n" +
+                        "하경이 20:18에 관리실에 들어가 정전 및 시스템을 조작할 준비를 하고, 20:43에 노래방으로 돌아가 알리바이를 조작하기 시작한 결정적인 정황이 드러났습니다.";
+          document.getElementById("resultBox").textContent = message;
+          render();
+          return;
+        }
+      }
+
+      // CCTV 콘솔
+      if (obj.id === "cctv_console") {
+        if (!hasEvidence("keyring_cctv")) {
+          openCctvConsolePuzzleModal();
+          return;
+        } else {
+          let message = "흔들다리 화면을 되감자 누군가 난간 쪽으로 작은 물건을 던지는 실루엣이 보인다.";
+          document.getElementById("resultBox").textContent = message;
+          render();
+          return;
+        }
+      }
+
+      state.clicked.push(obj.id);
+
+      let message = obj.text;
+      const gained = addEvidence(obj.evidence);
+
+      if (gained) {
+        const info = evidenceInfo[obj.evidence];
+        message += `\n\n[증거 획득] ${info ? info[0] : obj.evidence}`;
+      } else if (obj.evidence && hasEvidence(obj.evidence)) {
+        message += "\n\n이미 확보한 증거다.";
+      }
+
+      document.getElementById("resultBox").textContent = message;
+
+      checkUnlocks();
+      render();
+    }
+
+    function openCipherModal() {
+      document.getElementById("cipherModal").classList.add("show");
+      document.getElementById("cipherInput").value = "";
+      document.getElementById("cipherFeedback").textContent = "";
+      setTimeout(() => {
+        document.getElementById("cipherInput").focus();
+      }, 50);
+    }
+
+    function closeCipherModal() {
+      document.getElementById("cipherModal").classList.remove("show");
+    }
+
+    function submitCipher() {
+      const inputVal = document.getElementById("cipherInput").value.trim();
+      if (inputVal === "이서희") {
+        document.getElementById("cipherModal").classList.remove("show");
+        
+        state.clicked.push("recording_file");
+        addEvidence("edited_recording");
+        
+        let message = "잠금이 해제되었습니다!\n답이 일치하여 녹음 파일 분석 데이터가 출력되었습니다.\n\n" + 
+                      "파일에는 자연스러운 호흡도, 음정 흔들림도, 침 삼키는 소리도 없다. 배경 소음까지 같은 패턴으로 반복된다.";
+        
+        const info = evidenceInfo["edited_recording"];
+        message += `\n\n[증거 획득] ${info ? info[0] : "edited_recording"}`;
+        
+        document.getElementById("resultBox").textContent = message;
+        
+        checkUnlocks();
+        render();
+      } else if (inputVal === "") {
+        document.getElementById("cipherFeedback").textContent = "답을 입력해 주세요.";
+      } else {
+        document.getElementById("cipherFeedback").textContent = "답이 올바르지 않습니다. 단서들을 조합하여 다시 추리해 보세요.";
+      }
+    }
+
+    function openPastAccidentModal() {
+      document.getElementById("pastAccidentModal").classList.add("show");
+      document.getElementById("pastAccidentInput").value = "";
+      document.getElementById("pastAccidentFeedback").textContent = "";
+      setTimeout(() => {
+        document.getElementById("pastAccidentInput").focus();
+      }, 50);
+    }
+
+    function closePastAccidentModal() {
+      document.getElementById("pastAccidentModal").classList.remove("show");
+    }
+
+    function submitPastAccident() {
+      const inputVal = document.getElementById("pastAccidentInput").value.trim();
+      if (inputVal === "4138") {
+        document.getElementById("pastAccidentModal").classList.remove("show");
+        
+        state.clicked.push("past_accident_file");
+        addEvidence("past_accident_file");
+        
+        let message = "접근 승인.\n\n" +
+                      "[흔들다리 추락 사고 보고서]\n" +
+                      "피해자: 박민우 (당시 22세)\n" +
+                      "발생 시각: 2023년 8월 17일 21:13\n" +
+                      "사고 위치: 흔들다리 북쪽 절벽\n" +
+                      "현장 기록: 폭우로 시야 확보 어려움. CCTV 일부 손상.  피해자의 신발 한 짝만 발견됨. 현장에 있던 목격자는 정은서, 최하경 두 명뿐. 추가 메모: 최하경은 조사 내내 말을 거의 하지 않았음. 정은서는 반복적으로 \"내 잘못이 아니다\"라고 진술함.";
+        
+        const info = evidenceInfo["past_accident_file"];
+        message += `\n\n[증거 획득] ${info ? info[0] : "past_accident_file"}`;
+
+        document.getElementById("resultBox").textContent = message;
+        
+        checkUnlocks();
+        render();
+      } else if (inputVal === "") {
+        document.getElementById("pastAccidentFeedback").textContent = "비밀번호를 입력해 주세요.";
+      } else {
+        document.getElementById("pastAccidentFeedback").textContent = "비밀번호가 일치하지 않습니다. 힌트를 다시 확인하고 풀어보세요.";
+      }
+    }
+
+    function openLogRestoreModal() {
+      document.getElementById("logRestoreModal").classList.add("show");
+      document.getElementById("logRestoreInput").value = "";
+      document.getElementById("logRestoreFeedback").textContent = "";
+      setTimeout(() => {
+        document.getElementById("logRestoreInput").focus();
+      }, 50);
+    }
+
+    function closeLogRestoreModal() {
+      document.getElementById("logRestoreModal").classList.remove("show");
+    }
+
+    function submitLogRestore() {
+      const inputVal = document.getElementById("logRestoreInput").value.trim();
+      if (inputVal === "25") {
+        document.getElementById("logRestoreModal").classList.remove("show");
+        
+        state.clicked.push("log_restore");
+        addEvidence("restored_log");
+        
+        let message = "[복구 완료]\n\n" +
+                      "20:18 - 관리실 접근\n" +
+                      "20:43 - 노래방 출입 감지\n\n" +
+                      "하경이 20:18에 관리실에 들어가 정전 및 시스템을 조작할 준비를 하고, 20:43에 노래방으로 돌아가 알리바이를 조작하기 시작한 결정적인 정황이 드러났습니다.";
+        
+        const info = evidenceInfo["restored_log"];
+        message += `\n\n[증거 획득] ${info ? info[0] : "restored_log"}`;
+
+        document.getElementById("resultBox").textContent = message;
+        
+        checkUnlocks();
+        render();
+      } else if (inputVal === "") {
+        document.getElementById("logRestoreFeedback").textContent = "비밀번호를 입력해 주세요.";
+      } else {
+        document.getElementById("logRestoreFeedback").textContent = "비밀번호가 일치하지 않습니다. 힌트(시간 차이)를 다시 조율해 보세요.";
+      }
+    }
+
+    function openCardkeyPuzzleModal() {
+      document.getElementById("cardkeyPuzzleModal").classList.add("show");
+      document.getElementById("cardkeyPuzzleInput").value = "";
+      document.getElementById("cardkeyPuzzleFeedback").textContent = "";
+      setTimeout(() => {
+        document.getElementById("cardkeyPuzzleInput").focus();
+      }, 50);
+    }
+
+    function closeCardkeyPuzzleModal() {
+      document.getElementById("cardkeyPuzzleModal").classList.remove("show");
+    }
+
+    function submitCardkeyPuzzle() {
+      const inputVal = document.getElementById("cardkeyPuzzleInput").value.trim().replace(/\s+/g, "");
+      if (inputVal === "범인은바로") {
+        document.getElementById("cardkeyPuzzleModal").classList.remove("show");
+        
+        state.clicked.push("body");
+        addEvidence("cardkey_zero");
+        
+        let message = "정답입니다! 카드키의 오염 물질을 긁어내자 숨겨진 단서가 드러났습니다.\n\n" +
+                      "카드키 앞면에는 '이서희'라는 이름이 적혀 있다. 하지만 뒷면에는 손톱으로 긁은 듯한 표시가 남아 있다. 동그라미? 알파벳 O? 숫자 0?";
+        
+        const info = evidenceInfo["cardkey_zero"];
+        message += `\n\n[증거 획득] ${info ? info[0] : "cardkey_zero"}`;
+        
+        document.getElementById("resultBox").textContent = message;
+        
+        checkUnlocks();
+        render();
+      } else if (inputVal === "") {
+        document.getElementById("cardkeyPuzzleFeedback").textContent = "비밀번호를 입력해 주세요.";
+      } else {
+        document.getElementById("cardkeyPuzzleFeedback").textContent = "비밀번호가 일치하지 않습니다. 특수문자와 기호 대입 매핑을 다시 풀어보세요.";
+      }
+    }
+
+    function openFridgeScheduleModal() {
+      document.getElementById("fridgeScheduleModal").classList.add("show");
+      document.getElementById("fridgeScheduleInput").value = "";
+      document.getElementById("fridgeScheduleFeedback").textContent = "";
+      setTimeout(() => {
+        document.getElementById("fridgeScheduleInput").focus();
+      }, 50);
+    }
+
+    function closeFridgeScheduleModal() {
+      document.getElementById("fridgeScheduleModal").classList.remove("show");
+    }
+
+    function submitFridgeSchedule() {
+      const inputVal = document.getElementById("fridgeScheduleInput").value.trim();
+      if (inputVal === "9") {
+        document.getElementById("fridgeScheduleModal").classList.remove("show");
+        
+        state.clicked.push("fridge_schedule");
+        addEvidence("schedule_hakyeong");
+        
+        let message = "정답입니다! 지워진 일정표가 복구되었습니다.\n\n" +
+                      "[오늘의 일정]\n" +
+                      "08:00 아침 식사\n" +
+                      "10:30 흔들다리 산책\n" +
+                      "13:00 점심 준비\n" +
+                      "15:00 객실 사진 촬영\n" +
+                      "17:30 저녁 식사\n" +
+                      "19:00 노래방\n" +
+                      "20:00 다 같이 거실 모임\n" +
+                      "21:00 자유시간 \n" +
+                      "22:00 취침 예정";
+        
+        const info = evidenceInfo["schedule_hakyeong"];
+        message += `\n\n[증거 획득] ${info ? info[0] : "schedule_hakyeong"}`;
+        
+        document.getElementById("resultBox").textContent = message;
+        
+        checkUnlocks();
+        render();
+      } else if (inputVal === "") {
+        document.getElementById("fridgeScheduleFeedback").textContent = "값을 입력해 주세요.";
+      } else {
+        document.getElementById("fridgeScheduleFeedback").textContent = "값이 올바르지 않습니다. 수식의 해(■, ●, ▲)를 다시 구해보세요.";
+      }
+    }
+
+    function openRoomDoorsPuzzleModal() {
+      document.getElementById("roomDoorsPuzzleModal").classList.add("show");
+      document.getElementById("roomDoorsPuzzleInput").value = "";
+      document.getElementById("roomDoorsPuzzleFeedback").textContent = "";
+      setTimeout(() => {
+        document.getElementById("roomDoorsPuzzleInput").focus();
+      }, 50);
+    }
+
+    function closeRoomDoorsPuzzleModal() {
+      document.getElementById("roomDoorsPuzzleModal").classList.remove("show");
+    }
+
+    function submitRoomDoorsPuzzle() {
+      const inputVal = document.getElementById("roomDoorsPuzzleInput").value.trim();
+      if (inputVal === "504") {
+        document.getElementById("roomDoorsPuzzleModal").classList.remove("show");
+        
+        state.clicked.push("room_doors");
+        addEvidence("room_doors_solved");
+        
+        let message = "정답입니다! 암호가 풀렸습니다.\n\n" +
+                      "0호실은 최하경, 1호실은 이서희, 2호실은 전가현, 3호실은 정은서의 방이다.";
+        
+        const info = evidenceInfo["room_doors_solved"];
+        message += `\n\n[증거 획득] ${info ? info[0] : "room_doors_solved"}`;
+        
+        document.getElementById("resultBox").textContent = message;
+        
+        checkUnlocks();
+        render();
+      } else if (inputVal === "") {
+        document.getElementById("roomDoorsPuzzleFeedback").textContent = "답을 입력해 주세요.";
+      } else {
+        document.getElementById("roomDoorsPuzzleFeedback").textContent = "답이 올바르지 않습니다. 규칙을 다시 확인해 보세요.";
+      }
+    }
+
+    function openCctvPuzzleModal() {
+      document.getElementById("cctvPuzzleModal").classList.add("show");
+      document.getElementById("cctvPuzzleInput").value = "";
+      document.getElementById("cctvPuzzleFeedback").textContent = "";
+      setTimeout(() => {
+        document.getElementById("cctvPuzzleInput").focus();
+      }, 50);
+    }
+
+    function closeCctvPuzzleModal() {
+      document.getElementById("cctvPuzzleModal").classList.remove("show");
+    }
+
+    function submitCctvPuzzle() {
+      const inputVal = document.getElementById("cctvPuzzleInput").value.trim();
+      if (inputVal === "21") {
+        document.getElementById("cctvPuzzleModal").classList.remove("show");
+        
+        state.clicked.push("cctv_camera");
+        addEvidence("cctv_blind_spot");
+        
+        let message = "정답입니다! CCTV 관제 설정 조회가 해제되었습니다.\n\n" +
+                      "“0호실 쪽 구간은 기둥 때문에 정확히 찍히지 않는다. 누군가 이 사각지대를 알고 있었다면 움직임을 숨길 수 있다.”";
+        
+        const info = evidenceInfo["cctv_blind_spot"];
+        message += `\n\n[증거 획득] ${info ? info[0] : "cctv_blind_spot"}`;
+        
+        document.getElementById("resultBox").textContent = message;
+        
+        checkUnlocks();
+        render();
+      } else if (inputVal === "") {
+        document.getElementById("cctvPuzzleFeedback").textContent = "답을 입력해 주세요.";
+      } else {
+        document.getElementById("cctvPuzzleFeedback").textContent = "답이 올바르지 않습니다. 수열의 규칙을 다시 확인해 보세요.";
+      }
+    }
+
+    function openKaraokeMachinePuzzleModal() {
+      document.getElementById("karaokeMachinePuzzleModal").classList.add("show");
+      document.getElementById("karaokeMachinePuzzleInput").value = "";
+      document.getElementById("karaokeMachinePuzzleFeedback").textContent = "";
+      setTimeout(() => {
+        document.getElementById("karaokeMachinePuzzleInput").focus();
+      }, 50);
+    }
+
+    function closeKaraokeMachinePuzzleModal() {
+      document.getElementById("karaokeMachinePuzzleModal").classList.remove("show");
+    }
+
+    function submitKaraokeMachinePuzzle() {
+      const inputVal = document.getElementById("karaokeMachinePuzzleInput").value.trim();
+      if (inputVal === "256") {
+        document.getElementById("karaokeMachinePuzzleModal").classList.remove("show");
+        
+        state.clicked.push("karaoke_machine");
+        addEvidence("karaoke_repeat");
+        
+        let message = "정답입니다! 주파수 분석이 완료되었습니다.\n\n" +
+                      "20:40부터 21:20까지 같은 곡이 8회 반복 재생되었다. 하지만 버튼 입력은 20:40에 한 번뿐이다.";
+        
+        const info = evidenceInfo["karaoke_repeat"];
+        message += `\n\n[증거 획득] ${info ? info[0] : "karaoke_repeat"}`;
+        
+        document.getElementById("resultBox").textContent = message;
+        
+        checkUnlocks();
+        render();
+      } else if (inputVal === "") {
+        document.getElementById("karaokeMachinePuzzleFeedback").textContent = "답을 입력해 주세요.";
+      } else {
+        document.getElementById("karaokeMachinePuzzleFeedback").textContent = "답이 올바르지 않습니다. 주파수 수열의 패턴을 다시 연산해 보세요.";
+      }
+    }
+
+    function openCctvConsolePuzzleModal() {
+      document.getElementById("cctvConsolePuzzleModal").classList.add("show");
+      document.getElementById("cctvConsolePuzzleInput").value = "";
+      document.getElementById("cctvConsolePuzzleFeedback").textContent = "";
+      setTimeout(() => {
+        document.getElementById("cctvConsolePuzzleInput").focus();
+      }, 50);
+    }
+
+    function closeCctvConsolePuzzleModal() {
+      document.getElementById("cctvConsolePuzzleModal").classList.remove("show");
+    }
+
+    function submitCctvConsolePuzzle() {
+      const inputVal = document.getElementById("cctvConsolePuzzleInput").value.trim();
+      if (inputVal === "9") {
+        document.getElementById("cctvConsolePuzzleModal").classList.remove("show");
+        
+        state.clicked.push("cctv_console");
+        addEvidence("keyring_cctv");
+        
+        let message = "정답입니다! 콘솔 잠금이 해제되었습니다.\n\n" +
+                      "흔들다리 화면을 되감자 누군가 난간 쪽으로 작은 물건을 던지는 실루엣이 보인다.";
+        
+        const info = evidenceInfo["keyring_cctv"];
+        message += `\n\n[증거 획득] ${info ? info[0] : "keyring_cctv"}`;
+        
+        document.getElementById("resultBox").textContent = message;
+        
+        checkUnlocks();
+        render();
+      } else if (inputVal === "") {
+        document.getElementById("cctvConsolePuzzleFeedback").textContent = "답을 입력해 주세요.";
+      } else {
+        document.getElementById("cctvConsolePuzzleFeedback").textContent = "답이 올바르지 않습니다. 수식의 규칙을 다시 확인해 보세요.";
+      }
+    }
+
+    function checkUnlocks() {
+      Object.entries(rooms).forEach(([id, room]) => {
+        if (state.unlockedRooms.includes(id) && room.unlocks && room.condition()) {
+          unlockRoom(room.unlocks, room.unlockText);
+        }
+      });
+
+      updateFinalState();
+    }
+
+    function updateFinalState() {
+      const requiredEvidences = [
+        "cardkey_zero", "broken_glass", "alcohol_stain_living", "drag_mark",
+        "schedule_hakyeong", "glass_set", "schedule_draft",
+        "card_log_gap", "cctv_blind_spot", "seohee_outing_trace", "hakyeong_room_alcohol",
+        "alcohol_mic", "karaoke_repeat", "edited_recording", "repeat_button_trace", "alcohol_wipe_pack",
+        "keyring_cctv", "restored_log", "guest_cards", "past_accident_file"
+      ];
+      const collectedCount = requiredEvidences.filter(id => hasEvidence(id)).length;
+      
+      // 최종 범인 지목은 모든 구역(5개)이 해금되고, 모든 현장 증거(22개)가 수집되었으며,
+      // 현재 조사 구역이 관리실(office)일 때만 가능합니다.
+      if (state.unlockedRooms.length === 5 && collectedCount === requiredEvidences.length && state.currentRoom === "office") {
+        state.finalUnlocked = true;
+      } else {
+        state.finalUnlocked = false;
+      }
+
+      const finalBox = document.getElementById("finalBox");
+      if (state.finalUnlocked) {
+        finalBox.classList.add("show");
+      } else {
+        finalBox.classList.remove("show");
+      }
+    }
+
+    function renderEvidence() {
+      const list = document.getElementById("evidenceList");
+      list.innerHTML = "";
+
+      if (state.evidence.length === 0) {
+        const empty = document.createElement("p");
+        empty.className = "empty";
+        empty.textContent = "아직 확보한 증거가 없다.";
+        list.appendChild(empty);
+        return;
+      }
+
+      state.evidence.forEach(id => {
+        const info = evidenceInfo[id] || [id, ""];
+        const card = document.createElement("div");
+        card.className = "evidence-card";
+        card.innerHTML = `<strong>${info[0]}</strong><span>${info[1]}</span>`;
+        list.appendChild(card);
+      });
+    }
+
+    function renderProgress() {
+      const requiredEvidences = [
+        "cardkey_zero", "broken_glass", "alcohol_stain_living", "drag_mark",
+        "schedule_hakyeong", "glass_set", "schedule_draft",
+        "card_log_gap", "cctv_blind_spot", "seohee_outing_trace", "hakyeong_room_alcohol",
+        "alcohol_mic", "karaoke_repeat", "edited_recording", "repeat_button_trace", "alcohol_wipe_pack",
+        "keyring_cctv", "restored_log", "guest_cards", "past_accident_file"
+      ];
+      const collectedCount = requiredEvidences.filter(id => hasEvidence(id)).length;
+      
+      let statusMsg = "";
+      if (state.currentRoom !== "office") {
+        statusMsg = "최종 지목: 관리실(마지막 구역)로 이동 필요";
+      } else if (state.unlockedRooms.length < 5 || collectedCount < requiredEvidences.length) {
+        statusMsg = "최종 지목: 모든 구역의 증거 수집 필요";
+      } else {
+        statusMsg = "최종 지목 가능: 사건의 진실을 지목하세요";
+      }
+
+      const text = [
+        `해금된 구역: ${state.unlockedRooms.length} / ${Object.keys(rooms).length}`,
+        `획득한 현장 증거: ${collectedCount} / ${requiredEvidences.length}개`,
+        `현재 위치: ${rooms[state.currentRoom] ? rooms[state.currentRoom].title : ""}`,
+        statusMsg
+      ].join("\n");
+
+      document.getElementById("progressText").textContent = text;
+    }
+
+    function openTalk(personId) {
+      hideNotice();
+      const person = talks[personId];
+      const area = document.getElementById("talkArea");
+      const name = document.getElementById("talkName");
+      const intro = document.getElementById("talkIntro");
+      const choices = document.getElementById("talkChoices");
+
+      name.textContent = person.name;
+      intro.textContent = person.intro;
+      choices.innerHTML = "";
+
+      person.choices.forEach(choice => {
+        const btn = document.createElement("button");
+        btn.className = "talk-btn";
+        btn.textContent = choice.q;
+        btn.onclick = () => {
+          const gained = addEvidence(choice.ev);
+          intro.textContent = choice.a + (gained ? `\n\n[진술 확보] ${evidenceInfo[choice.ev][0]}` : "");
+          checkUnlocks();
+          renderEvidence();
+          renderProgress();
+        };
+        choices.appendChild(btn);
+      });
+
+      area.classList.add("show");
+      document.getElementById("resultBox").textContent = "용의자의 진술을 확인한다.";
+    }
+
+    let cinematicDismissed = false;
+    let timerInterval = null;
+    let gameSeconds = 0;
+    let audioCtx = null;
+    let rainNode = null;
+    let droneOsc1 = null;
+    let droneOsc2 = null;
+    let audioMuted = false;
+
+    function startTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+      gameSeconds = 0;
+      updateTimerDisplay();
+      timerInterval = setInterval(() => {
+        gameSeconds++;
+        updateTimerDisplay();
+      }, 1000);
+    }
+
+    function stopTimer() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+    }
+
+    function updateTimerDisplay() {
+      const timerEl = document.getElementById("gameTimer");
+      if (timerEl) {
+        const mins = Math.floor(gameSeconds / 60).toString().padStart(2, '0');
+        const secs = (gameSeconds % 60).toString().padStart(2, '0');
+        timerEl.textContent = `⏱️ 소요 시간: ${mins}:${secs}`;
+      }
+    }
+
+    function initSpookyAudio() {
+      if (audioCtx) return;
+      try {
+        const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioCtxClass();
+        
+        // 1. Spooky Hum (45Hz Sine & 53Hz Triangle, low filtered)
+        const droneGain = audioCtx.createGain();
+        droneGain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+        
+        droneOsc1 = audioCtx.createOscillator();
+        droneOsc1.type = 'sine';
+        droneOsc1.frequency.setValueAtTime(45, audioCtx.currentTime);
+        
+        droneOsc2 = audioCtx.createOscillator();
+        droneOsc2.type = 'triangle';
+        droneOsc2.frequency.setValueAtTime(53, audioCtx.currentTime);
+        
+        const lowpassFilter = audioCtx.createBiquadFilter();
+        lowpassFilter.type = 'lowpass';
+        lowpassFilter.frequency.setValueAtTime(100, audioCtx.currentTime);
+        
+        droneOsc1.connect(lowpassFilter);
+        droneOsc2.connect(lowpassFilter);
+        lowpassFilter.connect(droneGain);
+        droneGain.connect(audioCtx.destination);
+        
+        droneOsc1.start();
+        droneOsc2.start();
+
+        // 2. Synthesize Rain Noise Buffer in Loop
+        const bufferSize = audioCtx.sampleRate * 2; // 2 seconds of noise
+        const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          output[i] = Math.random() * 2 - 1;
+        }
+        
+        rainNode = audioCtx.createBufferSource();
+        rainNode.buffer = noiseBuffer;
+        rainNode.loop = true;
+        
+        const rainFilter = audioCtx.createBiquadFilter();
+        rainFilter.type = 'bandpass';
+        rainFilter.frequency.setValueAtTime(550, audioCtx.currentTime);
+        rainFilter.Q.setValueAtTime(0.7, audioCtx.currentTime);
+        
+        const rainGain = audioCtx.createGain();
+        rainGain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        
+        rainNode.connect(rainFilter);
+        rainFilter.connect(rainGain);
+        rainGain.connect(audioCtx.destination);
+        rainNode.start();
+        
+        // Schedule ongoing thunder/lightning strikes
+        scheduleThunderAndLightning();
+        updateAudioButton(true);
+      } catch (e) {
+        console.error("Spooky Web Audio initialization failed", e);
+      }
+    }
+
+    function scheduleThunderAndLightning() {
+      if (!audioCtx || audioMuted) return;
+      const delay = 14000 + Math.random() * 16000; // random interval (14 to 30s)
+      setTimeout(() => {
+        if (!audioMuted) {
+          triggerLightningFlash();
+        }
+        scheduleThunderAndLightning();
+      }, delay);
+    }
+
+    function triggerLightningFlash() {
+      if (cinematicDismissed) return;
+      // Flash GUI viewport
+      const flashDiv = document.getElementById("lightningFlash");
+      if (flashDiv) {
+        flashDiv.classList.add("flash-active");
+        setTimeout(() => {
+          flashDiv.classList.remove("flash-active");
+        }, 700);
+      }
+      
+      // Flash audio thunder rumble synths
+      if (audioCtx && !audioMuted) {
+        try {
+          const crashOsc = audioCtx.createOscillator();
+          const crashGain = audioCtx.createGain();
+          const filter = audioCtx.createBiquadFilter();
+          
+          crashOsc.type = 'sawtooth';
+          crashOsc.frequency.setValueAtTime(35, audioCtx.currentTime);
+          crashOsc.frequency.exponentialRampToValueAtTime(12, audioCtx.currentTime + 3.5);
+          
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(70, audioCtx.currentTime);
+          
+          crashGain.gain.setValueAtTime(0.24, audioCtx.currentTime);
+          crashGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 3.8);
+          
+          crashOsc.connect(filter);
+          filter.connect(crashGain);
+          crashGain.connect(audioCtx.destination);
+          
+          crashOsc.start();
+          crashOsc.stop(audioCtx.currentTime + 3.9);
+        } catch(err){}
+      }
+    }
+
+    function playCinematicScream() {
+      if (!audioCtx || audioMuted) return;
+      try {
+        const osc1 = audioCtx.createOscillator();
+        const osc2 = audioCtx.createOscillator();
+        const sGain = audioCtx.createGain();
+        const filter = audioCtx.createBiquadFilter();
+        
+        osc1.type = 'sawtooth';
+        osc1.frequency.setValueAtTime(800, audioCtx.currentTime);
+        osc1.frequency.linearRampToValueAtTime(1300, audioCtx.currentTime + 0.3);
+        osc1.frequency.exponentialRampToValueAtTime(180, audioCtx.currentTime + 1.4);
+        
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(450, audioCtx.currentTime);
+        osc2.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 1.4);
+        
+        filter.type = 'peaking';
+        filter.frequency.setValueAtTime(1100, audioCtx.currentTime);
+        
+        sGain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+        sGain.gain.linearRampToValueAtTime(0.35, audioCtx.currentTime + 0.2);
+        sGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5);
+        
+        osc1.connect(filter);
+        osc2.connect(filter);
+        filter.connect(sGain);
+        sGain.connect(audioCtx.destination);
+        
+        osc1.start();
+        osc2.start();
+        osc1.stop(audioCtx.currentTime + 1.6);
+        osc2.stop(audioCtx.currentTime + 1.6);
+      } catch (err){}
+    }
+
+    function playCinematicSlowTension() {
+      if (!audioCtx || audioMuted) return;
+      try {
+        const notes = [220, 207, 196, 174, 155, 110];
+        notes.forEach((freq, index) => {
+          const time = audioCtx.currentTime + index * 0.75;
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, time);
+          osc.frequency.linearRampToValueAtTime(freq - 18, time + 0.65);
+          
+          gain.gain.setValueAtTime(0, time);
+          gain.gain.linearRampToValueAtTime(0.15, time + 0.05);
+          gain.gain.exponentialRampToValueAtTime(0.001, time + 0.7);
+          
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          
+          osc.start(time);
+          osc.stop(time + 0.75);
+        });
+      } catch(err){}
+    }
+
+    function toggleSpookyAudio() {
+      if (!audioCtx) {
+        initSpookyAudio();
+        updateAudioButton(true);
+        return;
+      }
+      
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+        audioMuted = false;
+        updateAudioButton(true);
+      } else if (audioMuted) {
+        audioMuted = false;
+        updateAudioButton(true);
+      } else {
+        audioMuted = true;
+        updateAudioButton(false);
+      }
+    }
+
+    function updateAudioButton(active) {
+      const btn = document.getElementById("audioToggleBtn");
+      if (btn) {
+        btn.textContent = active ? "🔊 사운드 ON" : "🔇 사운드 OFF";
+        btn.style.borderColor = active ? "rgba(245, 196, 83, 0.4)" : "var(--locked)";
+        btn.style.color = active ? "var(--accent)" : "var(--locked)";
+      }
+    }
+
+    function startCinematic() {
+      initSpookyAudio();
+      
+      document.getElementById("opSlideStart").classList.remove("active");
+      document.getElementById("opSlideTrip").classList.add("active");
+      
+      playCinematicSlowTension();
+      
+      // Update trip subtitle at 2.5 seconds
+      setTimeout(() => {
+        const tripSub = document.getElementById("tripSubtitle");
+        if (tripSub) {
+          tripSub.textContent = "그때까지만 해도, 우리 사이에 어떤 끔찍한 비밀이 숨겨져 있는지 아무도 눈치채지 못했다.";
+        }
+      }, 2500);
+
+      // Slide 3: Scream at 5 seconds
+      setTimeout(() => {
+        document.getElementById("opSlideTrip").classList.remove("active");
+        document.getElementById("opSlideScream").classList.add("active");
+        triggerLightningFlash();
+        playCinematicScream();
+      }, 5000);
+
+      // Slide 4: Whisper at 7 seconds
+      setTimeout(() => {
+        document.getElementById("opSlideScream").classList.remove("active");
+        document.getElementById("opSlideWhisper").classList.add("active");
+      }, 7000);
+
+      // Slide 5: Title Reveal at 9 seconds
+      setTimeout(() => {
+        document.getElementById("opSlideWhisper").classList.remove("active");
+        document.getElementById("opSlideTitle").classList.add("active");
+        triggerLightningFlash();
+      }, 9000);
+    }
+
+    function goToGuestList() {
+      document.getElementById("opSlideTitle").classList.remove("active");
+      setTimeout(() => {
+        document.getElementById("opSlideTitle").style.display = "none";
+        const listSlide = document.getElementById("opSlideGuestList");
+        listSlide.style.display = "flex";
+        setTimeout(() => {
+          listSlide.classList.add("active");
+        }, 50);
+      }, 800);
+      triggerLightningFlash();
+    }
+
+    function goToGuestTalks() {
+      document.getElementById("opSlideGuestList").classList.remove("active");
+      setTimeout(() => {
+        document.getElementById("opSlideGuestList").style.display = "none";
+        const talksSlide = document.getElementById("opSlideGuestTalks");
+        talksSlide.style.display = "flex";
+        setTimeout(() => {
+          talksSlide.classList.add("active");
+        }, 50);
+      }, 800);
+      triggerLightningFlash();
+    }
+
+    function selectCinTalk(suspectId) {
+      if (!state.cinDialogueRead) {
+        state.cinDialogueRead = { seohee: false, gahyun: false, hakyeong: false };
+      }
+      state.cinDialogueRead[suspectId] = true;
+      
+      const speakerEl = document.getElementById("cinDialogueSpeaker");
+      const textEl = document.getElementById("cinDialogueText");
+      
+      // Reset borders of all option buttons
+      document.getElementById("cinTalkTab_seohee").style.borderColor = "rgba(255,255,255,0.1)";
+      document.getElementById("cinTalkTab_seohee").style.background = "rgba(255,255,255,0.03)";
+      document.getElementById("cinTalkTab_gahyun").style.borderColor = "rgba(255,255,255,0.1)";
+      document.getElementById("cinTalkTab_gahyun").style.background = "rgba(255,255,255,0.03)";
+      document.getElementById("cinTalkTab_hakyeong").style.borderColor = "rgba(255,255,255,0.1)";
+      document.getElementById("cinTalkTab_hakyeong").style.background = "rgba(255,255,255,0.03)";
+      
+      // Highlight selected Button
+      const selectedBtn = document.getElementById("cinTalkTab_" + suspectId);
+      if (selectedBtn) {
+        selectedBtn.style.borderColor = "#ff3c3c";
+        selectedBtn.style.background = "rgba(255, 60, 60, 0.12)";
+      }
+      
+      const statements = {
+        seohee: {
+          name: "👩‍💼 이서희 (용의자 1)",
+          text: "“내가 왜 펜션 CCTV 위치를 검색해 봤냐고요? 하… 진짜 몰라서 물어요? 은서 그 기집애가 만든 1분 단위 시간표 좀 보세요. 화장실 가는 시간까지 감시당하는 기분이었다니까요? 사람 미치게 만드는 통제에서 딱 몇 분이라도 숨 좀 쉬고 싶어서 사각지대를 찾아본 것뿐이에요. 내가 은서를 죽였다는 증거라도 있어요?”"
+        },
+        gahyun: {
+          name: "👩‍🎨 전가현 (용의자 2)",
+          text: "“제 키링이 왜 흔들다리 난간에서 나와요? 전 거기 가기도 싫단 말이에요! 은서가 억지로 그 무서운 다리를 건너게 하려고 밀어붙였을 때, 정말 숨도 안 쉬어지고 심장이 터질 것 같았어요. 그래서 소리 지르고 화를 내긴 했지만… 그렇다고 제가 은서를 죽여요? 전 제 방에 계속 틀어박혀서 울고만 있었다고요, 제발 믿어주세요!”"
+        },
+        hakyeong: {
+          name: "👩‍🎤 최하경 (용의자 3)",
+          text: "“은서가 안타깝게 되었다는 소식은 들었어요. 하지만 전 정말 사건 당시엔 지하 노래방에 쭉 있었는걸요? 방음벽이 두꺼워서 밖에서 무슨 일이 일어났는지는 전혀 몰랐어요. 일정표에 얽매이지 않고 편하게 쉬려다 이런 일이 생겨서 참 유감스럽네요.”"
+        }
+      };
+      
+      if (statements[suspectId]) {
+        speakerEl.textContent = statements[suspectId].name;
+        textEl.textContent = statements[suspectId].text;
+      }
+      
+      // Check if all dialogues have been read
+      if (state.cinDialogueRead.seohee && state.cinDialogueRead.gahyun && state.cinDialogueRead.hakyeong) {
+        const nextBtn = document.getElementById("cinDialogueNextBtn");
+        nextBtn.style.opacity = "1";
+        nextBtn.style.pointerEvents = "auto";
+        nextBtn.removeAttribute("title");
+        nextBtn.style.background = "rgba(255, 60, 60, 0.45)";
+        nextBtn.style.borderColor = "#ff3c3c";
+        nextBtn.style.boxShadow = "0 0 15px rgba(255, 60, 60, 0.4)";
+      }
+    }
+
+    function goToGameStart() {
+      document.getElementById("opSlideGuestTalks").classList.remove("active");
+      setTimeout(() => {
+        document.getElementById("opSlideGuestTalks").style.display = "none";
+        const startSlide = document.getElementById("opSlideGameStart");
+        startSlide.style.display = "flex";
+        setTimeout(() => {
+          startSlide.classList.add("active");
+        }, 50);
+      }, 800);
+      triggerLightningFlash();
+    }
+
+    function dismissCinematic() {
+      cinematicDismissed = true;
+      const overlay = document.getElementById("openingSequence");
+      if (overlay) {
+        overlay.style.transition = "all 1s ease-in-out";
+        overlay.style.opacity = "0";
+        overlay.style.pointerEvents = "none";
+        setTimeout(() => {
+          overlay.style.display = "none";
+          startTimer();
+        }, 1000);
+      }
+    }
+
+    function accuse(personId) {
+      if (!state.finalUnlocked) {
+        document.getElementById("resultBox").textContent = "아직 증거가 부족하다. 핵심 증거를 더 확보해야 한다.";
+        return;
+      }
+
+      stopTimer();
+
+      if (personId === "hakyeong") {
+        showEnding(
+          "진실 엔딩",
+          "당신은 하경을 바라보았다.\n\n“0호실. 숫자 0은 당신의 방 번호였어.”\n\n하경은 미소를 지으려 했지만, 입꼬리가 떨렸다.\n\n“노래방에 있었다고 했지. 하지만 그건 네 목소리가 아니라 반복 재생된 녹음이었어. 거실의 알코올 얼룩과 같은 성분이 마이크에서도 나왔고.”\n\n당신은 마지막 증거를 꺼냈다.\n\n“3년 전 흔들다리. 그날 은서와 단둘이 있었던 사람도 너였지.”\n\n하경의 얼굴에서 표정이 사라졌다. 폭우 소리만이 거실을 채웠다.\n\n새벽이 되자 폭우가 잦아들었다. 멀리서 구조대의 불빛이 안개를 가르고 다가왔다.\n\n흔들다리는 아직 흔들리고 있었다. 하지만 진실은 더 이상 흔들리지 않았다.",
+          true
+        );
+      } else if (personId === "seohee") {
+        showEnding(
+          "실패 엔딩",
+          "서희의 카드키는 은서의 손에 있었다.\n하지만 숫자 0은 서희의 이름이 아니라 객실 번호를 가리키고 있었다.\n\n당신의 추리는 아직 완성되지 않았다.\n폭우는 밤새 그치지 않았고, 흔들다리 펜션의 진실은 안개 속에 묻혔다.",
+          false
+        );
+      } else {
+        showEnding(
+          "실패 엔딩",
+          "가현의 키링은 흔들다리에서 발견됐다.\n하지만 그녀는 그 다리에 접근할 수 없었다.\n누군가 그녀의 공포를 이용해 함정을 만든 것이다.\n\n당신은 잘못된 사람을 범인으로 지목했다.",
+          false
+        );
+      }
+    }
+
+    function showEnding(title, text, success) {
+      stopTimer();
+      const overlay = document.getElementById("endingOverlay");
+      const card = document.getElementById("endingCard");
+      document.getElementById("endingTitle").textContent = title;
+      
+      const timeString = `\n\n⏱️ 총 소요 시간: ${Math.floor(gameSeconds / 60)}분 ${gameSeconds % 60}초`;
+      document.getElementById("endingText").textContent = text + timeString;
+      
+      card.classList.remove("success", "fail");
+      card.classList.add(success ? "success" : "fail");
+      overlay.classList.add("show");
+    }
+
+    function toggleGuestDetails(element) {
+      if (!cinematicDismissed) return;
+      element.classList.toggle("expanded");
+    }
+
+    function restartGame() {
+      state = {
+        currentRoom: "living",
+        unlockedRooms: ["living"],
+        evidence: [],
+        clicked: [],
+        finalUnlocked: false
+      };
+      document.getElementById("endingOverlay").classList.remove("show");
+      document.getElementById("talkArea").classList.remove("show");
+      hideNotice();
+      document.getElementById("resultBox").textContent = "폭우가 쏟아지던 밤, 당신은 관리실에서 요란한 소리에 잠이 깼다.\n은퇴 후 이 외딴 펜션을 인수했을 때, 당신은 조용한 노후를 꿈꿨다.\n하지만 30년 형사 본능은 거짓말을 하지 않는다.\n\n거실 문을 열자, 소파 옆 바닥에 스물두 살짜리 여자아이가 쓰러져 있었다.\n흔들다리는 끊겼다. 외부와의 연락은 두절됐다. 용의자는 이 펜션 안에 있다.";
+      render();
+      startTimer();
+    }
+
+    // Default room render on load, but wait for cinematic overlay start to trigger active timer.
+    render();
+    updateAudioButton(false);
+  </script>
+</body>
+</html>

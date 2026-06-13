@@ -1,0 +1,8 @@
+{
+  "name": "흔들다리 펜션",
+  "description": "mystery escape web game featuring multiple levels, hidden clues, and a ticking clock for suspense.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
